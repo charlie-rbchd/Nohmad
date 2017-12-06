@@ -1,0 +1,53 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "type": "shell",
+            "command": "make",
+            "windows": {
+                "options": {
+                    "shell": {
+                        "executable": "C:\\msys64\\mingw64.exe"
+                    }
+                }
+            },
+            "problemMatcher": "$gcc",
+            "presentation": {
+                "echo": false,
+                "reveal": "never",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Run",
+            "group": "none",
+            "type": "shell",
+            "command": "make run",
+            "options": {
+                "cwd": "${workspaceFolder}/../.."
+            },
+            "windows": {
+                "options": {
+                    "shell": {
+                        "executable": "C:\\msys64\\mingw64.exe"
+                    }
+                }
+            },
+            "presentation": {
+                "echo": false,
+                "reveal": "never",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        }
+    ]
+}
