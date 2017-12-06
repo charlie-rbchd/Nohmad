@@ -1,0 +1,5 @@
+build/
+res/*.ai
+*.dll
+*.dylib
+*.so
