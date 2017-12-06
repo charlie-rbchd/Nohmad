@@ -6,7 +6,7 @@ include ../../plugin.mk
 
 
 dist: all
-	mkdir -p dist/Fundamental
-	cp LICENSE* dist/Fundamental/
-	cp $(TARGET) dist/Fundamental/
-	cp -R res dist/Fundamental/
+	mkdir -p dist/Nohmad
+	cp LICENSE* dist/Nohmad/
+	cp $(TARGET) dist/Nohmad/
+	cp -R res dist/Nohmad/
