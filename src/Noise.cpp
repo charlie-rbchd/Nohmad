@@ -1,5 +1,7 @@
 #include "Nohmad.hpp"
 
+#include <random>
+
 struct Noise : Module {
 	enum ParamIds {
 		NUM_PARAMS
@@ -20,13 +22,21 @@ struct Noise : Module {
 		NUM_OUTPUTS
 	};
 
-	Noise() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS) {}
+	Noise() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS), uniform(-1.0f, 1.0f) {
+		rng.seed(std::random_device()());
+	}
 
 	void step() override;
+
+private:
+	std::mt19937 rng;
+	std::uniform_real_distribution<float> uniform;
 };
 
 void Noise::step() {
-
+	if (outputs[WHITE_OUTPUT].active) {
+		outputs[WHITE_OUTPUT].value = uniform(rng);
+	}
 }
 
 NoiseWidget::NoiseWidget() {
