@@ -48,6 +48,7 @@ void Noise::step() {
 	outputs[WHITE_OUTPUT].value = 5.0 * randValue;
 	outputs[RED_OUTPUT].value = 5.0 * clampf(10.0 * lpf.lowpass(), -1.0, 1.0);
 	outputs[PURPLE_OUTPUT].value = 5.0 * clampf(0.9 * hpf.highpass(), -1.0, 1.0);
+	outputs[QUANTA_OUTPUT].value = 5.0 * sgnf(randValue);
 }
 
 NoiseWidget::NoiseWidget() {
