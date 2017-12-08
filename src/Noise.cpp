@@ -20,15 +20,15 @@ struct NoiseGenerator {
 struct PinkFilter {
 	float b0, b1, b2, b3, b4, b5, b6, y;
 
-	void process(float white) {
-		b0 = 0.99886 * b0 + white * 0.0555179; 
-		b1 = 0.99332 * b1 + white * 0.0750759; 
-		b2 = 0.96900 * b2 + white * 0.1538520; 
-		b3 = 0.86650 * b3 + white * 0.3104856; 
-		b4 = 0.55000 * b4 + white * 0.5329522; 
-		b5 = -0.7616 * b5 - white * 0.0168980; 
-		y = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
-		b6 = white * 0.115926; 
+	void process(float x) {
+		b0 = 0.99886 * b0 + x * 0.0555179; 
+		b1 = 0.99332 * b1 + x * 0.0750759; 
+		b2 = 0.96900 * b2 + x * 0.1538520; 
+		b3 = 0.86650 * b3 + x * 0.3104856; 
+		b4 = 0.55000 * b4 + x * 0.5329522; 
+		b5 = -0.7616 * b5 - x * 0.0168980; 
+		y = b0 + b1 + b2 + b3 + b4 + b5 + b6 + x * 0.5362;
+		b6 = x * 0.115926; 
 	}
 
 	float pink() {
@@ -56,17 +56,17 @@ struct Noise : Module {
 		NUM_OUTPUTS
 	};
 
+	NoiseGenerator noise;
+	RCFilter lpf;
+	RCFilter hpf;
+	PinkFilter pf;
+
 	Noise() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS) {
 		lpf.setCutoff(441.0 / engineGetSampleRate());
 		hpf.setCutoff(44100.0 / engineGetSampleRate());
 	}
 
 	void step() override;
-
-	RCFilter lpf;
-	RCFilter hpf;
-	PinkFilter pf;
-	NoiseGenerator noise;
 };
 
 void Noise::step() {
