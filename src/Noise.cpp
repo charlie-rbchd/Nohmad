@@ -57,13 +57,16 @@ struct Noise : Module {
 	};
 
 	NoiseGenerator noise;
-	RCFilter lpf;
-	RCFilter hpf;
-	PinkFilter pf;
+
+	PinkFilter pinkFilter;
+	RCFilter redFilter;
+	RCFilter purpleFilter;
+	RCFilter blueFilter;
 
 	Noise() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS) {
-		lpf.setCutoff(441.0 / engineGetSampleRate());
-		hpf.setCutoff(44100.0 / engineGetSampleRate());
+		redFilter.setCutoff(441.0 / engineGetSampleRate());
+		purpleFilter.setCutoff(44100.0 / engineGetSampleRate());
+		blueFilter.setCutoff(44100.0 / engineGetSampleRate());
 	}
 
 	void step() override;
@@ -77,18 +80,26 @@ void Noise::step() {
 	}
 
 	if (outputs[RED_OUTPUT].active) {
-		lpf.process(white);
-		outputs[RED_OUTPUT].value = 5.0 * clampf(10.0 * lpf.lowpass(), -1.0, 1.0);
+		redFilter.process(white);
+		outputs[RED_OUTPUT].value = 5.0 * clampf(10.0 * redFilter.lowpass(), -1.0, 1.0);
+	}
+
+	if (outputs[PINK_OUTPUT].active || outputs[BLUE_OUTPUT].active) {
+		pinkFilter.process(white);
 	}
 
 	if (outputs[PINK_OUTPUT].active) {
-		pf.process(white);
-		outputs[PINK_OUTPUT].value = clampf(pf.pink(), -5.0, 5.0);
+		outputs[PINK_OUTPUT].value = clampf(pinkFilter.pink(), -5.0, 5.0);
+	}
+
+	if (outputs[BLUE_OUTPUT].active) {
+		blueFilter.process(pinkFilter.pink());
+		outputs[BLUE_OUTPUT].value = clampf(3.2 * blueFilter.highpass(), -5.0, 5.0);
 	}
 
 	if (outputs[PURPLE_OUTPUT].active) {
-		hpf.process(white);
-		outputs[PURPLE_OUTPUT].value = 5.0 * clampf(0.9 * hpf.highpass(), -1.0, 1.0);
+		purpleFilter.process(white);
+		outputs[PURPLE_OUTPUT].value = 5.0 * clampf(0.9 * purpleFilter.highpass(), -1.0, 1.0);
 	}
 
 	if (outputs[QUANTA_OUTPUT].active) {
