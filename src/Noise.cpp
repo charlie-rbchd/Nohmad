@@ -4,6 +4,38 @@
 
 #include <random>
 
+struct NoiseGenerator {
+	std::mt19937 rng;
+	std::uniform_real_distribution<float> uniform;
+
+	NoiseGenerator() : uniform(-1.0, 1.0) {
+		rng.seed(std::random_device()());
+	}
+
+	float white() {
+		return uniform(rng);
+	}
+};
+
+struct PinkFilter {
+	float b0, b1, b2, b3, b4, b5, b6, y;
+
+	void process(float white) {
+		b0 = 0.99886 * b0 + white * 0.0555179; 
+		b1 = 0.99332 * b1 + white * 0.0750759; 
+		b2 = 0.96900 * b2 + white * 0.1538520; 
+		b3 = 0.86650 * b3 + white * 0.3104856; 
+		b4 = 0.55000 * b4 + white * 0.5329522; 
+		b5 = -0.7616 * b5 - white * 0.0168980; 
+		y = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+		b6 = white * 0.115926; 
+	}
+
+	float pink() {
+		return y;
+	}
+};
+
 struct Noise : Module {
 	enum ParamIds {
 		NUM_PARAMS
@@ -24,31 +56,44 @@ struct Noise : Module {
 		NUM_OUTPUTS
 	};
 
-	Noise() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS), uniform(-1.0, 1.0) {
-		rng.seed(std::random_device()());
+	Noise() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS) {
 		lpf.setCutoff(441.0 / engineGetSampleRate());
 		hpf.setCutoff(44100.0 / engineGetSampleRate());
 	}
 
 	void step() override;
 
-private:
-	std::mt19937 rng;
-	std::uniform_real_distribution<float> uniform;
 	RCFilter lpf;
 	RCFilter hpf;
+	PinkFilter pf;
+	NoiseGenerator noise;
 };
 
 void Noise::step() {
-	float randValue = uniform(rng);
+	float white = noise.white();
 
-	lpf.process(randValue);
-	hpf.process(randValue);
+	if (outputs[WHITE_OUTPUT].active) {
+		outputs[WHITE_OUTPUT].value = 5.0 * white;
+	}
 
-	outputs[WHITE_OUTPUT].value = 5.0 * randValue;
-	outputs[RED_OUTPUT].value = 5.0 * clampf(10.0 * lpf.lowpass(), -1.0, 1.0);
-	outputs[PURPLE_OUTPUT].value = 5.0 * clampf(0.9 * hpf.highpass(), -1.0, 1.0);
-	outputs[QUANTA_OUTPUT].value = 5.0 * sgnf(randValue);
+	if (outputs[RED_OUTPUT].active) {
+		lpf.process(white);
+		outputs[RED_OUTPUT].value = 5.0 * clampf(10.0 * lpf.lowpass(), -1.0, 1.0);
+	}
+
+	if (outputs[PINK_OUTPUT].active) {
+		pf.process(white);
+		outputs[PINK_OUTPUT].value = clampf(pf.pink(), -5.0, 5.0);
+	}
+
+	if (outputs[PURPLE_OUTPUT].active) {
+		hpf.process(white);
+		outputs[PURPLE_OUTPUT].value = 5.0 * clampf(0.9 * hpf.highpass(), -1.0, 1.0);
+	}
+
+	if (outputs[QUANTA_OUTPUT].active) {
+		outputs[QUANTA_OUTPUT].value = 5.0 * sgnf(white);
+	}
 }
 
 NoiseWidget::NoiseWidget() {
