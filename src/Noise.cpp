@@ -1,5 +1,7 @@
 #include "Nohmad.hpp"
 
+#include "dsp/filter.hpp"
+
 #include <random>
 
 struct Noise : Module {
@@ -22,8 +24,10 @@ struct Noise : Module {
 		NUM_OUTPUTS
 	};
 
-	Noise() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS), uniform(-1.0f, 1.0f) {
+	Noise() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS), uniform(-1.0, 1.0) {
 		rng.seed(std::random_device()());
+		lpf.setCutoff(441.0 / engineGetSampleRate());
+		hpf.setCutoff(44100.0 / engineGetSampleRate());
 	}
 
 	void step() override;
@@ -31,12 +35,19 @@ struct Noise : Module {
 private:
 	std::mt19937 rng;
 	std::uniform_real_distribution<float> uniform;
+	RCFilter lpf;
+	RCFilter hpf;
 };
 
 void Noise::step() {
-	if (outputs[WHITE_OUTPUT].active) {
-		outputs[WHITE_OUTPUT].value = uniform(rng);
-	}
+	float randValue = uniform(rng);
+
+	lpf.process(randValue);
+	hpf.process(randValue);
+
+	outputs[WHITE_OUTPUT].value = 5.0 * randValue;
+	outputs[RED_OUTPUT].value = 5.0 * clampf(10.0 * lpf.lowpass(), -1.0, 1.0);
+	outputs[PURPLE_OUTPUT].value = 5.0 * clampf(0.9 * hpf.highpass(), -1.0, 1.0);
 }
 
 NoiseWidget::NoiseWidget() {
