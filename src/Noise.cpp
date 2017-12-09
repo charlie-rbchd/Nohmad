@@ -1,8 +1,10 @@
 #include "Nohmad.hpp"
-
 #include "dsp/filter.hpp"
+#include "dsp/fft.hpp"
 
 #include <random>
+#include <complex>
+#include <cmath>
 
 struct NoiseGenerator {
 	std::mt19937 rng;
@@ -14,6 +16,34 @@ struct NoiseGenerator {
 
 	float white() {
 		return uniform(rng);
+	}
+};
+
+template<int N>
+struct AWeightingFilter {
+	SimpleFFT fft;
+	float y;
+
+	AWeightingFilter() : fft(N, false) {}
+
+	float aweight(float f) {
+		float f2  = pow(f, 2);
+		float num = pow(12194, 2) * pow(f, 4);
+		float den = (f2 + pow(20.6, 2)) * (sqrt((f2 + pow(107.7, 2)) * (f2 + pow(737.9, 2)))) * (f2 + pow(12194, 2));
+		return num / den;
+	}
+
+	void process(float x) {
+		std::complex<float> cx = x;
+		std::complex<float> cy = 0.0;
+		fft.fft(&cx, &cy);
+
+		float f = abs(cy.real()) * engineGetSampleRate() / static_cast<float>(N);
+		y = aweight(f) * (1 / aweight(1000.0)) * 1.73 - 1.0;
+	}
+
+	float weighted() {
+		return y;
 	}
 };
 
@@ -60,8 +90,9 @@ struct Noise : Module {
 
 	PinkFilter pinkFilter;
 	RCFilter redFilter;
-	RCFilter purpleFilter;
+	AWeightingFilter<2> greyFilter;
 	RCFilter blueFilter;
+	RCFilter purpleFilter;
 
 	Noise() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS) {
 		redFilter.setCutoff(441.0 / engineGetSampleRate());
@@ -92,6 +123,11 @@ void Noise::step() {
 		outputs[PINK_OUTPUT].value = clampf(pinkFilter.pink(), -5.0, 5.0);
 	}
 
+	if (outputs[GREY_OUTPUT].active) {
+		greyFilter.process(white);
+		outputs[GREY_OUTPUT].value = 5.0 * greyFilter.weighted();
+	}
+
 	if (outputs[BLUE_OUTPUT].active) {
 		blueFilter.process(pinkFilter.pink());
 		outputs[BLUE_OUTPUT].value = clampf(3.2 * blueFilter.highpass(), -5.0, 5.0);
@@ -110,7 +146,7 @@ void Noise::step() {
 NoiseWidget::NoiseWidget() {
 	Noise *module = new Noise();
 	setModule(module);
-	box.size = Vec(15*3, 380);
+	box.size = Vec(15 * 3, 380);
 
 	{
 		SVGPanel *panel = new SVGPanel();
