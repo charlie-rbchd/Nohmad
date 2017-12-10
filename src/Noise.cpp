@@ -25,7 +25,7 @@ struct AWeightingFilter {
 	SimpleFFT fft;
 	float y;
 
-	AWeightingFilter() : fft(2, false) {}
+	AWeightingFilter() : fft(1, false) {}
 
 	void process(float x) {
 		std::complex<float> cx = x;
@@ -33,7 +33,7 @@ struct AWeightingFilter {
 		fft.fft(&cx, &cy);
 
 		static const float a1000 = aweight(1000.0);
-		float f = abs(cy.real()) * engineGetSampleRate() / 2.0;
+		float f = abs(cy.real()) * engineGetSampleRate();
 		y = aweight(f) * (1 / a1000) * 1.73 - 1.0;
 	}
 
