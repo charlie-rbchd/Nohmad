@@ -1,8 +1,8 @@
 # Nohmad
 Nohmad is a collection of virtual modules for VCV Rack. It is currently a work in progress, more modules will be added as time goes by.
 
-### Noise (*WIP*)
-A noise generator based on the [Quantum Rainbow 2](http://www.steadystatefate.com/quantum-rainbow-2) eurorack module by Steady State Fate. As of now, the grey output still need to be implemented but the other outputs should be fully functional.
+### Noise
+A noise generator based on the [Quantum Rainbow 2](http://www.steadystatefate.com/quantum-rainbow-2) eurorack module by Steady State Fate.
 
 ![Nohmad Noise](/res/Noise.png?raw=true "Nohmad Noise")
 
