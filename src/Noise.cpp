@@ -1,6 +1,8 @@
 #include "Nohmad.hpp"
+
 #include "dsp/filter.hpp"
 #include "dsp/fft.hpp"
+#include "dsp/fir.hpp"
 
 #include <random>
 #include <complex>
@@ -19,31 +21,32 @@ struct NoiseGenerator {
 	}
 };
 
-template<int N>
 struct AWeightingFilter {
 	SimpleFFT fft;
 	float y;
 
-	AWeightingFilter() : fft(N, false) {}
-
-	float aweight(float f) {
-		float f2  = pow(f, 2);
-		float num = pow(12194, 2) * pow(f, 4);
-		float den = (f2 + pow(20.6, 2)) * (sqrt((f2 + pow(107.7, 2)) * (f2 + pow(737.9, 2)))) * (f2 + pow(12194, 2));
-		return num / den;
-	}
+	AWeightingFilter() : fft(2, false) {}
 
 	void process(float x) {
 		std::complex<float> cx = x;
 		std::complex<float> cy = 0.0;
 		fft.fft(&cx, &cy);
 
-		float f = abs(cy.real()) * engineGetSampleRate() / static_cast<float>(N);
-		y = aweight(f) * (1 / aweight(1000.0)) * 1.73 - 1.0;
+		static const float a1000 = aweight(1000.0);
+		float f = abs(cy.real()) * engineGetSampleRate() / 2.0;
+		y = aweight(f) * (1 / a1000) * 1.73 - 1.0;
 	}
 
 	float weighted() {
 		return y;
+	}
+
+protected:
+	float aweight(float f) {
+		float f2  = pow(f, 2);
+		float num = 148693636 * pow(f, 4);
+		float den = (f2 + 424.36) * sqrt((f2 + 11599.29) * (f2 + 544496.41)) * (f2 + 148693636);
+		return num / den;
 	}
 };
 
@@ -90,7 +93,7 @@ struct Noise : Module {
 
 	PinkFilter pinkFilter;
 	RCFilter redFilter;
-	AWeightingFilter<2> greyFilter;
+	AWeightingFilter greyFilter;
 	RCFilter blueFilter;
 	RCFilter purpleFilter;
 
