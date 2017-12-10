@@ -1,5 +1,27 @@
 #include "Nohmad.hpp"
 
+struct LorenzAttractor {
+    float x, y, z;
+    float sigma, beta, rho;
+
+    void process() {
+        x = sigma * (y - x);
+        y = x * (rho - z) - y;
+        z = (x * y) - (beta * z);
+    }
+};
+
+struct RosslerAttractor {
+    float x, y, z;
+    float a, b, c;
+
+    void process() {
+        x = -y - z;
+        y = z + (a * y);
+        z = b + z * (x - c);
+    }
+};
+
 struct Chaos : Module {
 	enum ParamIds {
         LORENZ_SIGMA_PARAM,
@@ -31,6 +53,9 @@ struct Chaos : Module {
 		NUM_OUTPUTS
 	};
 
+    LorenzAttractor lorenz;
+    RosslerAttractor rossler;
+
 	Chaos() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS) {
 
     }
@@ -40,11 +65,25 @@ struct Chaos : Module {
 
 void Chaos::step() {
     if (outputs[LORENZ_X_OUTPUT].active || outputs[LORENZ_Y_OUTPUT].active || outputs[LORENZ_Z_OUTPUT].active) {
-        // TODO: Compute Lorenz output
+        lorenz.sigma = params[LORENZ_SIGMA_PARAM].value;
+        lorenz.beta = params[LORENZ_BETA_PARAM].value;
+        lorenz.rho = params[LORENZ_RHO_PARAM].value;
+
+        lorenz.process();
+        outputs[LORENZ_X_OUTPUT].value = lorenz.x;
+        outputs[LORENZ_Y_OUTPUT].value = lorenz.y;
+        outputs[LORENZ_Z_OUTPUT].value = lorenz.z;
     }
 
     if (outputs[ROSSLER_X_OUTPUT].active || outputs[ROSSLER_Y_OUTPUT].active || outputs[ROSSLER_Z_OUTPUT].active) {
-        // TODO: Compute Rossler output
+        rossler.a = params[ROSSLER_A_PARAM].value;
+        rossler.b = params[ROSSLER_B_PARAM].value;
+        rossler.c = params[ROSSLER_C_PARAM].value;
+
+        rossler.process();
+        outputs[ROSSLER_X_OUTPUT].value = rossler.x;
+        outputs[ROSSLER_Y_OUTPUT].value = rossler.y;
+        outputs[ROSSLER_Z_OUTPUT].value = rossler.z;
     }
 }
 
