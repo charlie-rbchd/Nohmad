@@ -1,3 +1,4 @@
+#pragma once
 #include "rack.hpp"
 
 using namespace rack;
@@ -10,4 +11,8 @@ extern Plugin *plugin;
 
 struct NoiseWidget : ModuleWidget {
 	NoiseWidget();
+};
+
+struct ChaosWidget : ModuleWidget {
+	ChaosWidget();
 };
