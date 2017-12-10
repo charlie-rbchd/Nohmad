@@ -13,6 +13,6 @@ struct NoiseWidget : ModuleWidget {
 	NoiseWidget();
 };
 
-struct ChaosWidget : ModuleWidget {
-	ChaosWidget();
+struct StrangeAttractorsWidget : ModuleWidget {
+	StrangeAttractorsWidget();
 };

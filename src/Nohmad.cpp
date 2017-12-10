@@ -11,5 +11,5 @@ void init(rack::Plugin *p) {
 	p->website = "https://github.com/joelrobichaud/Nohmad";
 
 	p->addModel(createModel<NoiseWidget>("Nohmad", "Noise", "Noise", OSCILLATOR_TAG));
-	p->addModel(createModel<ChaosWidget>("Nohmad", "Chaos", "Chaos", OSCILLATOR_TAG));
+	p->addModel(createModel<StrangeAttractorsWidget>("Nohmad", "StrangeAttractors", "Strange Attractors", OSCILLATOR_TAG));
 }
