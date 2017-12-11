@@ -11,8 +11,16 @@
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/../..",
+            "program": "${workspaceFolder}/../../Rack",
+            "linux": {
+                "environment": [
+                    {
+                        "name": "LD_LIBRARY_PATH",
+                        "value": "${workspaceFolder}/../../dep/lib"
+                    }
+                ]
+            },
             "osx": {
-                "program": "${workspaceFolder}/../../Rack",
                 "environment": [
                     {
                         "name": "DYLD_FALLBACK_LIBRARY_PATH",
