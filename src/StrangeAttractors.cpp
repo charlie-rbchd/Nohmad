@@ -4,10 +4,17 @@ struct LorenzAttractor {
     float x, y, z;
     float sigma, beta, rho;
 
-    void process() {
-        x = sigma * (y - x);
-        y = x * (rho - z) - y;
-        z = (x * y) - (beta * z);
+    LorenzAttractor() :
+        x(1.0), y(1.0), z(1.0),
+        sigma(10.0), beta(8.0 / 3.0), rho(28.0) {}
+
+    void process(float dt) {
+        float dx = sigma * (y - x);
+        float dy = x * (rho - z) - y;
+        float dz = (x * y) - (beta * z);
+        x += dx * dt;
+        y += dy * dt;
+        z += dz * dt;
     }
 };
 
@@ -15,10 +22,17 @@ struct RosslerAttractor {
     float x, y, z;
     float a, b, c;
 
-    void process() {
-        x = -y - z;
-        y = z + (a * y);
-        z = b + z * (x - c);
+    RosslerAttractor() :
+        x(1.0), y(1.0), z(1.0),
+        a(0.1), b(0.1), c(14.0) {}
+
+    void process(float dt) {
+        float dx = -y - z;
+        float dy = x + (a * y);
+        float dz = b + z * (x - c);
+        x += dx * dt;
+        y += dy * dt;
+        z += dz * dt;
     }
 };
 
@@ -69,10 +83,10 @@ void StrangeAttractors::step() {
         lorenz.beta = params[LORENZ_BETA_PARAM].value;
         lorenz.rho = params[LORENZ_RHO_PARAM].value;
 
-        lorenz.process();
-        outputs[LORENZ_X_OUTPUT].value = lorenz.x;
-        outputs[LORENZ_Y_OUTPUT].value = lorenz.y;
-        outputs[LORENZ_Z_OUTPUT].value = lorenz.z;
+        lorenz.process(1.0 / engineGetSampleRate());
+        outputs[LORENZ_X_OUTPUT].value = 5.0 * clampf(0.044 * lorenz.x, -1.0, 1.0);
+        outputs[LORENZ_Y_OUTPUT].value = 5.0 * clampf(0.0328 * lorenz.y, -1.0, 1.0);
+        // outputs[LORENZ_Z_OUTPUT].value = lorenz.z;
     }
 
     if (outputs[ROSSLER_X_OUTPUT].active || outputs[ROSSLER_Y_OUTPUT].active || outputs[ROSSLER_Z_OUTPUT].active) {
@@ -80,10 +94,10 @@ void StrangeAttractors::step() {
         rossler.b = params[ROSSLER_B_PARAM].value;
         rossler.c = params[ROSSLER_C_PARAM].value;
 
-        rossler.process();
-        outputs[ROSSLER_X_OUTPUT].value = rossler.x;
-        outputs[ROSSLER_Y_OUTPUT].value = rossler.y;
-        outputs[ROSSLER_Z_OUTPUT].value = rossler.z;
+        rossler.process(1.0 / engineGetSampleRate());
+        outputs[ROSSLER_X_OUTPUT].value = 5.0 * clampf(0.054 * rossler.x, -1.0, 1.0);
+        outputs[ROSSLER_Y_OUTPUT].value = 5.0 * clampf(0.0569 * rossler.y, -1.0, 1.0);
+        // outputs[ROSSLER_Z_OUTPUT].value = rossler.z;
     }
 }
 
@@ -100,7 +114,7 @@ StrangeAttractorsWidget::StrangeAttractorsWidget() {
 	}
 
     addParam(createParam<Davies1900hBlackKnob>(Vec(8, 45), module, StrangeAttractors::LORENZ_SIGMA_PARAM, 0.0, 100.0, 10.0));
-    addParam(createParam<Davies1900hBlackKnob>(Vec(50, 45), module, StrangeAttractors::LORENZ_BETA_PARAM, 0.0, 10.0, 8.0 / 3.0));
+    addParam(createParam<Davies1900hBlackKnob>(Vec(50, 45), module, StrangeAttractors::LORENZ_BETA_PARAM, 0.0, 3.0, 8.0 / 3.0));
     addParam(createParam<Davies1900hBlackKnob>(Vec(92.5, 45), module, StrangeAttractors::LORENZ_RHO_PARAM, 0.0, 100.0, 28.0));
 
     addParam(createParam<Davies1900hBlackKnob>(Vec(8, 237), module, StrangeAttractors::ROSSLER_A_PARAM, 0.0, 1.0, 0.1));
