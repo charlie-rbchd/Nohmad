@@ -21,35 +21,6 @@ struct NoiseGenerator {
 	}
 };
 
-struct AWeightingFilter {
-	SimpleFFT fft;
-	float y;
-
-	AWeightingFilter() : fft(1, false) {}
-
-	void process(float x) {
-		std::complex<float> cx = x;
-		std::complex<float> cy = 0.0;
-		fft.fft(&cx, &cy);
-
-		static const float a1000 = aweight(1000.0);
-		float f = abs(cy.real()) * engineGetSampleRate();
-		y = aweight(f) * (1 / a1000) * 1.73 - 1.0;
-	}
-
-	float weighted() {
-		return y;
-	}
-
-protected:
-	float aweight(float f) {
-		float f2  = pow(f, 2);
-		float num = 148693636 * pow(f, 4);
-		float den = (f2 + 424.36) * sqrt((f2 + 11599.29) * (f2 + 544496.41)) * (f2 + 148693636);
-		return num / den;
-	}
-};
-
 struct PinkFilter {
 	float b0, b1, b2, b3, b4, b5, b6, y;
 
@@ -66,6 +37,45 @@ struct PinkFilter {
 
 	float pink() {
 		return y;
+	}
+};
+
+struct NotchFilter {
+	float notchFreq, notchBandwidth;
+	float y;
+	float x1, x2, y1, y2;
+
+	void setFreq(float r) {
+		notchFreq = r;
+	}
+
+	void setBandwidth(float r) {
+		notchBandwidth = r;
+	}
+
+	void process(float x) {
+		float c2pf = cos(2.0 * M_PI * notchFreq);
+
+		float r = 1.0 - 3.0 * notchBandwidth;
+		float r2 = r * r;
+		float k = (1.0 - (2.0 * r * c2pf) + r2) / (2.0 - 2.0 * c2pf);
+
+		float a0 = k;
+		float a1 = -2.0 * k * c2pf;
+		float a2 = k;
+		float b1 = 2.0 * r * c2pf;
+		float b2 = -r2;
+
+		float y = a0 * x + a1 * x1 + a2 * x2 + b1 * y1 + b2 * y2;
+
+		x2 = x1;
+		x1 = x;
+		y2 = y1;
+		y1 = y;
+	}
+
+	float notch() {
+		return y1;
 	}
 };
 
@@ -93,7 +103,7 @@ struct Noise : Module {
 
 	PinkFilter pinkFilter;
 	RCFilter redFilter;
-	AWeightingFilter greyFilter;
+	NotchFilter greyFilter;
 	RCFilter blueFilter;
 	RCFilter purpleFilter;
 
@@ -101,6 +111,8 @@ struct Noise : Module {
 		redFilter.setCutoff(441.0 / engineGetSampleRate());
 		purpleFilter.setCutoff(44100.0 / engineGetSampleRate());
 		blueFilter.setCutoff(44100.0 / engineGetSampleRate());
+		greyFilter.setFreq(1000.0 / engineGetSampleRate());
+		greyFilter.setBandwidth(0.3);
 	}
 
 	void step() override;
@@ -108,6 +120,9 @@ struct Noise : Module {
 
 void Noise::step() {
 	float white = noise.white();
+	if (outputs[PINK_OUTPUT].active || outputs[BLUE_OUTPUT].active || outputs[GREY_OUTPUT].active) {
+		pinkFilter.process(white);
+	}
 
 	if (outputs[WHITE_OUTPUT].active) {
 		outputs[WHITE_OUTPUT].value = 5.0 * white;
@@ -118,17 +133,13 @@ void Noise::step() {
 		outputs[RED_OUTPUT].value = 5.0 * clampf(10.0 * redFilter.lowpass(), -1.0, 1.0);
 	}
 
-	if (outputs[PINK_OUTPUT].active || outputs[BLUE_OUTPUT].active) {
-		pinkFilter.process(white);
-	}
-
 	if (outputs[PINK_OUTPUT].active) {
 		outputs[PINK_OUTPUT].value = clampf(pinkFilter.pink(), -5.0, 5.0);
 	}
 
 	if (outputs[GREY_OUTPUT].active) {
-		greyFilter.process(white);
-		outputs[GREY_OUTPUT].value = 5.0 * greyFilter.weighted();
+		greyFilter.process(pinkFilter.pink() * 0.034);
+		outputs[GREY_OUTPUT].value = 1.18 * (pinkFilter.pink() * 0.5 + greyFilter.notch() * 0.5);
 	}
 
 	if (outputs[BLUE_OUTPUT].active) {
