@@ -42,7 +42,6 @@ struct PinkFilter {
 
 struct NotchFilter {
 	float notchFreq, notchBandwidth;
-	float y;
 	float x1, x2, y1, y2;
 
 	void setFreq(float r) {
@@ -81,6 +80,7 @@ struct NotchFilter {
 
 struct Noise : Module {
 	enum ParamIds {
+		QUANTA_PARAM,
 		NUM_PARAMS
 	};
 
@@ -130,32 +130,38 @@ void Noise::step() {
 
 	if (outputs[RED_OUTPUT].active) {
 		redFilter.process(white);
-		outputs[RED_OUTPUT].value = 5.0 * clampf(10.0 * redFilter.lowpass(), -1.0, 1.0);
+		outputs[RED_OUTPUT].value = 5.0 * clampf(7.8 * redFilter.lowpass(), -1.0, 1.0);
 	}
 
 	if (outputs[PINK_OUTPUT].active) {
-		outputs[PINK_OUTPUT].value = clampf(pinkFilter.pink(), -5.0, 5.0);
+		outputs[PINK_OUTPUT].value = 5.0 * clampf(0.18 * pinkFilter.pink(), -1.0, 1.0);
 	}
 
 	if (outputs[GREY_OUTPUT].active) {
 		greyFilter.process(pinkFilter.pink() * 0.034);
-		outputs[GREY_OUTPUT].value = 1.18 * (pinkFilter.pink() * 0.5 + greyFilter.notch() * 0.5);
+		outputs[GREY_OUTPUT].value = 5.0 * clampf(0.23 * (pinkFilter.pink() * 0.5 + greyFilter.notch() * 0.5), -1.0, 1.0);
 	}
 
 	if (outputs[BLUE_OUTPUT].active) {
 		blueFilter.process(pinkFilter.pink());
-		outputs[BLUE_OUTPUT].value = clampf(3.2 * blueFilter.highpass(), -5.0, 5.0);
+		outputs[BLUE_OUTPUT].value = 5.0 * clampf(0.64 * blueFilter.highpass(), -1.0, 1.0);
 	}
 
 	if (outputs[PURPLE_OUTPUT].active) {
 		purpleFilter.process(white);
-		outputs[PURPLE_OUTPUT].value = 5.0 * clampf(0.9 * purpleFilter.highpass(), -1.0, 1.0);
+		outputs[PURPLE_OUTPUT].value = 5.0 * clampf(0.82 * purpleFilter.highpass(), -1.0, 1.0);
 	}
 
 	if (outputs[QUANTA_OUTPUT].active) {
-		outputs[QUANTA_OUTPUT].value = 5.0 * sgnf(white);
+		outputs[QUANTA_OUTPUT].value = abs(white) <= params[QUANTA_PARAM].value ? 5.0 * sgnf(white) : 0.0;
 	}
 }
+
+struct MiniTrimpot : Trimpot  {
+	MiniTrimpot() {
+		box.size = Vec(12, 12);
+	}
+};
 
 NoiseWidget::NoiseWidget() {
 	Noise *module = new Noise();
@@ -176,4 +182,6 @@ NoiseWidget::NoiseWidget() {
 	addOutput(createOutput<PJ301MPort>(Vec(10.5, 247), module, Noise::BLUE_OUTPUT));
 	addOutput(createOutput<PJ301MPort>(Vec(10.5, 295), module, Noise::PURPLE_OUTPUT));
 	addOutput(createOutput<PJ301MPort>(Vec(10.5, 343), module, Noise::QUANTA_OUTPUT));
+
+	addParam(createParam<MiniTrimpot>(Vec(30, 365), module, Noise::QUANTA_PARAM, 0.0, 1.0, 0.066));
 }
