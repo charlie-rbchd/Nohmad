@@ -3,36 +3,42 @@
 struct LorenzAttractor {
     float x, y, z;
     float sigma, beta, rho;
+    float pitchX, pitchY, pitchZ;
 
     LorenzAttractor() :
         x(1.0), y(1.0), z(1.0),
-        sigma(10.0), beta(8.0 / 3.0), rho(28.0) {}
+        sigma(10.0), beta(8.0 / 3.0), rho(28.0),
+        pitchX(0.5), pitchY(0.5), pitchZ(0.5) {}
 
     void process(float dt) {
         float dx = sigma * (y - x);
         float dy = x * (rho - z) - y;
         float dz = (x * y) - (beta * z);
-        x += dx * dt;
-        y += dy * dt;
-        z += dz * dt;
+
+        x += dx * dt * pitchX * 750.0 * 0.5;
+        y += dy * dt * pitchY * 750.0 * 0.5;
+        z += dz * dt * pitchZ * 750.0 * 0.5;
     }
 };
 
 struct RosslerAttractor {
     float x, y, z;
     float a, b, c;
+    float pitchX, pitchY, pitchZ;
 
     RosslerAttractor() :
         x(1.0), y(1.0), z(1.0),
-        a(0.1), b(0.1), c(14.0) {}
+        a(0.1), b(0.1), c(14.0),
+        pitchX(0.5), pitchY(0.5), pitchZ(0.5) {}
 
     void process(float dt) {
         float dx = -y - z;
         float dy = x + (a * y);
         float dz = b + z * (x - c);
-        x += dx * dt;
-        y += dy * dt;
-        z += dz * dt;
+
+        x += dx * dt * pitchX * 2.91 * 1000.0;
+        y += dy * dt * pitchY * 2.91 * 1000.0;
+        z += dz * dt * pitchZ * 2.91 * 1000.0;
     }
 };
 
@@ -41,9 +47,15 @@ struct StrangeAttractors : Module {
         LORENZ_SIGMA_PARAM,
         LORENZ_BETA_PARAM,
         LORENZ_RHO_PARAM,
+        LORENZ_X_PITCH_PARAM,
+        LORENZ_Y_PITCH_PARAM,
+        LORENZ_Z_PITCH_PARAM,
         ROSSLER_A_PARAM,
         ROSSLER_B_PARAM,
         ROSSLER_C_PARAM,
+        ROSSLER_X_PITCH_PARAM,
+        ROSSLER_Y_PITCH_PARAM,
+        ROSSLER_Z_PITCH_PARAM,
 		NUM_PARAMS
 	};
 
@@ -82,10 +94,13 @@ void StrangeAttractors::step() {
         lorenz.sigma = params[LORENZ_SIGMA_PARAM].value;
         lorenz.beta = params[LORENZ_BETA_PARAM].value;
         lorenz.rho = params[LORENZ_RHO_PARAM].value;
+        lorenz.pitchX = params[LORENZ_X_PITCH_PARAM].value;
+        lorenz.pitchY = params[LORENZ_Y_PITCH_PARAM].value;
+        lorenz.pitchZ = params[LORENZ_Z_PITCH_PARAM].value;
 
         lorenz.process(1.0 / engineGetSampleRate());
-        outputs[LORENZ_X_OUTPUT].value = 5.0 * clampf(0.044 * lorenz.x, -1.0, 1.0);
-        outputs[LORENZ_Y_OUTPUT].value = 5.0 * clampf(0.0328 * lorenz.y, -1.0, 1.0);
+        outputs[LORENZ_X_OUTPUT].value = 5.0 * 0.044 * lorenz.x;
+        outputs[LORENZ_Y_OUTPUT].value = 5.0 * 0.0328 * lorenz.y;
         // outputs[LORENZ_Z_OUTPUT].value = lorenz.z;
     }
 
@@ -93,13 +108,22 @@ void StrangeAttractors::step() {
         rossler.a = params[ROSSLER_A_PARAM].value;
         rossler.b = params[ROSSLER_B_PARAM].value;
         rossler.c = params[ROSSLER_C_PARAM].value;
+        rossler.pitchX = params[ROSSLER_X_PITCH_PARAM].value;
+        rossler.pitchY = params[ROSSLER_Y_PITCH_PARAM].value;
+        rossler.pitchZ = params[ROSSLER_Z_PITCH_PARAM].value;
 
         rossler.process(1.0 / engineGetSampleRate());
-        outputs[ROSSLER_X_OUTPUT].value = 5.0 * clampf(0.054 * rossler.x, -1.0, 1.0);
-        outputs[ROSSLER_Y_OUTPUT].value = 5.0 * clampf(0.0569 * rossler.y, -1.0, 1.0);
+        outputs[ROSSLER_X_OUTPUT].value = 5.0 * 0.054 * rossler.x;
+        outputs[ROSSLER_Y_OUTPUT].value = 5.0 * 0.0569 * rossler.y;
         // outputs[ROSSLER_Z_OUTPUT].value = rossler.z;
     }
 }
+
+struct MiniTrimpot : Trimpot  {
+	MiniTrimpot() {
+		box.size = Vec(12, 12);
+	}
+};
 
 StrangeAttractorsWidget::StrangeAttractorsWidget() {
 	StrangeAttractors *module = new StrangeAttractors();
@@ -113,18 +137,16 @@ StrangeAttractorsWidget::StrangeAttractorsWidget() {
 		addChild(panel);
 	}
 
-    addParam(createParam<Davies1900hBlackKnob>(Vec(8, 45), module, StrangeAttractors::LORENZ_SIGMA_PARAM, 0.0, 100.0, 10.0));
-    addParam(createParam<Davies1900hBlackKnob>(Vec(50, 45), module, StrangeAttractors::LORENZ_BETA_PARAM, 0.0, 3.0, 8.0 / 3.0));
-    addParam(createParam<Davies1900hBlackKnob>(Vec(92.5, 45), module, StrangeAttractors::LORENZ_RHO_PARAM, 0.0, 100.0, 28.0));
-
-    addParam(createParam<Davies1900hBlackKnob>(Vec(8, 237), module, StrangeAttractors::ROSSLER_A_PARAM, 0.0, 1.0, 0.1));
-    addParam(createParam<Davies1900hBlackKnob>(Vec(50, 237), module, StrangeAttractors::ROSSLER_B_PARAM, 0.0, 1.0, 0.1));
-    addParam(createParam<Davies1900hBlackKnob>(Vec(92.5, 237), module, StrangeAttractors::ROSSLER_C_PARAM, 0.0, 100.0, 14.0));
+    addParam(createParam<Davies1900hBlackKnob>(Vec(8, 45), module, StrangeAttractors::LORENZ_SIGMA_PARAM, 3.0, 30.0, 10.0));
+    addParam(createParam<Davies1900hBlackKnob>(Vec(50, 45), module, StrangeAttractors::LORENZ_BETA_PARAM, 0.5, 3.0, 8.0 / 3.0));
+    addParam(createParam<Davies1900hBlackKnob>(Vec(92.5, 45), module, StrangeAttractors::LORENZ_RHO_PARAM, 10.0, 80.0, 28.0));
+    addParam(createParam<Davies1900hBlackKnob>(Vec(8, 237), module, StrangeAttractors::ROSSLER_A_PARAM, 0.0, 0.3, 0.2));
+    addParam(createParam<Davies1900hBlackKnob>(Vec(50, 237), module, StrangeAttractors::ROSSLER_B_PARAM, 0.1, 1.0, 0.2));
+    addParam(createParam<Davies1900hBlackKnob>(Vec(92.5, 237), module, StrangeAttractors::ROSSLER_C_PARAM, 3.0, 10.0, 5.7));
 
 	addInput(createInput<PJ301MPort>(Vec(12.5, 110), module, StrangeAttractors::LORENZ_SIGMA_INPUT));
 	addInput(createInput<PJ301MPort>(Vec(55, 110), module, StrangeAttractors::LORENZ_BETA_INPUT));
 	addInput(createInput<PJ301MPort>(Vec(97.5, 110), module, StrangeAttractors::LORENZ_RHO_INPUT));
-
 	addInput(createInput<PJ301MPort>(Vec(12.5, 300), module, StrangeAttractors::ROSSLER_A_INPUT));
 	addInput(createInput<PJ301MPort>(Vec(55, 300), module, StrangeAttractors::ROSSLER_B_INPUT));
 	addInput(createInput<PJ301MPort>(Vec(97.5, 300), module, StrangeAttractors::ROSSLER_C_INPUT));
@@ -132,8 +154,14 @@ StrangeAttractorsWidget::StrangeAttractorsWidget() {
 	addOutput(createOutput<PJ301MPort>(Vec(12.5, 154), module, StrangeAttractors::LORENZ_X_OUTPUT));
 	addOutput(createOutput<PJ301MPort>(Vec(55, 154), module, StrangeAttractors::LORENZ_Y_OUTPUT));
 	addOutput(createOutput<PJ301MPort>(Vec(97.5, 154), module, StrangeAttractors::LORENZ_Z_OUTPUT));
-
 	addOutput(createOutput<PJ301MPort>(Vec(12.5, 345), module, StrangeAttractors::ROSSLER_X_OUTPUT));
 	addOutput(createOutput<PJ301MPort>(Vec(55, 345), module, StrangeAttractors::ROSSLER_Y_OUTPUT));
 	addOutput(createOutput<PJ301MPort>(Vec(97.5, 345), module, StrangeAttractors::ROSSLER_Z_OUTPUT));
+
+	addParam(createParam<MiniTrimpot>(Vec(34, 175), module, StrangeAttractors::LORENZ_X_PITCH_PARAM, 0.1, 1.0, 0.5));
+	addParam(createParam<MiniTrimpot>(Vec(76.5, 175), module, StrangeAttractors::LORENZ_Y_PITCH_PARAM, 0.1, 1.0, 0.5));
+	addParam(createParam<MiniTrimpot>(Vec(119, 175), module, StrangeAttractors::LORENZ_Z_PITCH_PARAM, 0.1, 1.0, 0.5));
+	addParam(createParam<MiniTrimpot>(Vec(34, 366), module, StrangeAttractors::ROSSLER_X_PITCH_PARAM, 0.1, 1.0, 0.5));
+	addParam(createParam<MiniTrimpot>(Vec(76.5, 366), module, StrangeAttractors::ROSSLER_Y_PITCH_PARAM, 0.1, 1.0, 0.5));
+	addParam(createParam<MiniTrimpot>(Vec(119, 366), module, StrangeAttractors::ROSSLER_Z_PITCH_PARAM, 0.1, 1.0, 0.5));
 }
