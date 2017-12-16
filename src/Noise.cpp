@@ -1,11 +1,8 @@
 #include "Nohmad.hpp"
 
 #include "dsp/filter.hpp"
-#include "dsp/fft.hpp"
-#include "dsp/fir.hpp"
 
 #include <random>
-#include <complex>
 #include <cmath>
 
 struct NoiseGenerator {
@@ -22,7 +19,8 @@ struct NoiseGenerator {
 };
 
 struct PinkFilter {
-	float b0, b1, b2, b3, b4, b5, b6, y;
+	float b0, b1, b2, b3, b4, b5, b6; // Coefficients
+	float y; // Out
 
 	void process(float x) {
 		b0 = 0.99886 * b0 + x * 0.0555179; 
@@ -41,30 +39,22 @@ struct PinkFilter {
 };
 
 struct NotchFilter {
-	float notchFreq, notchBandwidth;
-	float x1, x2, y1, y2;
+	float freq, bandwidth; // Params
+	float a0, a1, a2, b1, b2; // Coefficients
+	float x1, x2; // In
+	float y1, y2; // out
 
-	void setFreq(float r) {
-		notchFreq = r;
+	void setFreq(float value) {
+		freq = value;
+		computeCoefficients();
 	}
 
-	void setBandwidth(float r) {
-		notchBandwidth = r;
+	void setBandwidth(float value) {
+		bandwidth = value;
+		computeCoefficients();
 	}
 
 	void process(float x) {
-		float c2pf = cos(2.0 * M_PI * notchFreq);
-
-		float r = 1.0 - 3.0 * notchBandwidth;
-		float r2 = r * r;
-		float k = (1.0 - (2.0 * r * c2pf) + r2) / (2.0 - 2.0 * c2pf);
-
-		float a0 = k;
-		float a1 = -2.0 * k * c2pf;
-		float a2 = k;
-		float b1 = 2.0 * r * c2pf;
-		float b2 = -r2;
-
 		float y = a0 * x + a1 * x1 + a2 * x2 + b1 * y1 + b2 * y2;
 
 		x2 = x1;
@@ -75,6 +65,19 @@ struct NotchFilter {
 
 	float notch() {
 		return y1;
+	}
+
+	void computeCoefficients() {
+		float c2pf = cos(2.0 * M_PI * freq);
+		float r = 1.0 - 3.0 * bandwidth;
+		float r2 = r * r;
+		float k = (1.0 - (2.0 * r * c2pf) + r2) / (2.0 - 2.0 * c2pf);
+
+		a0 = k;
+		a1 = -2.0 * k * c2pf;
+		a2 = k;
+		b1 = 2.0 * r * c2pf;
+		b2 = -r2;
 	}
 };
 

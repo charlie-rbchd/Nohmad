@@ -1,7 +1,7 @@
 #include "Nohmad.hpp"
 
 struct LorenzAttractor {
-    float sigma, beta, rho, pitch; // In
+    float sigma, beta, rho, pitch; // Params
     float x, y, z; // Out
 
     static constexpr float DEFAULT_SIGNMA_VALUE = 10.0;
@@ -25,7 +25,7 @@ struct LorenzAttractor {
 };
 
 struct RosslerAttractor {
-    float a, b, c, pitch; // In
+    float a, b, c, pitch; // Params
     float x, y, z; // Out
 
     static constexpr float DEFAULT_A_VALUE = 0.2;
