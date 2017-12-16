@@ -1,14 +1,17 @@
 #include "Nohmad.hpp"
 
 struct LorenzAttractor {
-    float x, y, z;
-    float sigma, beta, rho;
-    float pitch;
+    float sigma, beta, rho, pitch; // In
+    float x, y, z; // Out
+
+    static constexpr float DEFAULT_SIGNMA_VALUE = 10.0;
+    static constexpr float DEFAULT_BETA_VALUE = 8.0 / 3.0;
+    static constexpr float DEFAULT_RHO_VALUE = 28.0;
+    static constexpr float DEFAULT_PITCH_VALUE = 0.5;
 
     LorenzAttractor() :
-        x(1.0), y(1.0), z(1.0),
-        sigma(10.0), beta(8.0 / 3.0), rho(28.0),
-        pitch(0.5) {}
+        sigma(DEFAULT_SIGNMA_VALUE), beta(DEFAULT_BETA_VALUE), rho(DEFAULT_RHO_VALUE), pitch(DEFAULT_PITCH_VALUE),
+        x(1.0), y(1.0), z(1.0) {}
 
     void process(float dt) {
         float dx = sigma * (y - x);
@@ -22,14 +25,17 @@ struct LorenzAttractor {
 };
 
 struct RosslerAttractor {
-    float x, y, z;
-    float a, b, c;
-    float pitch;
+    float a, b, c, pitch; // In
+    float x, y, z; // Out
+
+    static constexpr float DEFAULT_A_VALUE = 0.2;
+    static constexpr float DEFAULT_B_VALUE = 0.2;
+    static constexpr float DEFAULT_C_VALUE = 5.7;
+    static constexpr float DEFAULT_PITCH_VALUE = 0.5;
 
     RosslerAttractor() :
-        x(1.0), y(1.0), z(1.0),
-        a(0.2), b(0.2), c(5.7),
-        pitch(0.5) {}
+        a(DEFAULT_A_VALUE), b(DEFAULT_B_VALUE), c(DEFAULT_C_VALUE), pitch(DEFAULT_PITCH_VALUE),
+        x(1.0), y(1.0), z(1.0) {}
 
     void process(float dt) {
         float dx = -y - z;
@@ -121,14 +127,14 @@ StrangeAttractorsWidget::StrangeAttractorsWidget() {
 		addChild(panel);
 	}
 
-    addParam(createParam<Davies1900hBlackKnob>(Vec(8, 45), module, StrangeAttractors::LORENZ_SIGMA_PARAM, 3.0, 30.0, 10.0));
-    addParam(createParam<Davies1900hBlackKnob>(Vec(50, 45), module, StrangeAttractors::LORENZ_BETA_PARAM, 0.5, 3.0, 8.0 / 3.0));
-    addParam(createParam<Davies1900hBlackKnob>(Vec(92.5, 45), module, StrangeAttractors::LORENZ_RHO_PARAM, 13.0, 80.0, 28.0));
-	addParam(createParam<Davies1900hBlackKnob>(Vec(135, 45), module, StrangeAttractors::LORENZ_PITCH_PARAM, 0.001, 1.0, 0.5));
-    addParam(createParam<Davies1900hBlackKnob>(Vec(8, 237), module, StrangeAttractors::ROSSLER_A_PARAM, 0.0, 0.2, 0.2));
-    addParam(createParam<Davies1900hBlackKnob>(Vec(50, 237), module, StrangeAttractors::ROSSLER_B_PARAM, 0.1, 1.0, 0.2));
-    addParam(createParam<Davies1900hBlackKnob>(Vec(92.5, 237), module, StrangeAttractors::ROSSLER_C_PARAM, 3.0, 12.0, 5.7));
-	addParam(createParam<Davies1900hBlackKnob>(Vec(135, 237), module, StrangeAttractors::ROSSLER_PITCH_PARAM, 0.001, 1.0, 0.5));
+    addParam(createParam<Davies1900hBlackKnob>(Vec(8, 45), module, StrangeAttractors::LORENZ_SIGMA_PARAM, 3.0, 30.0, LorenzAttractor::DEFAULT_SIGNMA_VALUE));
+    addParam(createParam<Davies1900hBlackKnob>(Vec(50, 45), module, StrangeAttractors::LORENZ_BETA_PARAM, 0.5, 3.0, LorenzAttractor::DEFAULT_BETA_VALUE));
+    addParam(createParam<Davies1900hBlackKnob>(Vec(92.5, 45), module, StrangeAttractors::LORENZ_RHO_PARAM, 13.0, 80.0, LorenzAttractor::DEFAULT_RHO_VALUE));
+	addParam(createParam<Davies1900hBlackKnob>(Vec(135, 45), module, StrangeAttractors::LORENZ_PITCH_PARAM, 0.001, 1.0, LorenzAttractor::DEFAULT_PITCH_VALUE));
+    addParam(createParam<Davies1900hBlackKnob>(Vec(8, 237), module, StrangeAttractors::ROSSLER_A_PARAM, 0.0, 0.2, RosslerAttractor::DEFAULT_A_VALUE));
+    addParam(createParam<Davies1900hBlackKnob>(Vec(50, 237), module, StrangeAttractors::ROSSLER_B_PARAM, 0.1, 1.0, RosslerAttractor::DEFAULT_B_VALUE));
+    addParam(createParam<Davies1900hBlackKnob>(Vec(92.5, 237), module, StrangeAttractors::ROSSLER_C_PARAM, 3.0, 12.0, RosslerAttractor::DEFAULT_C_VALUE));
+	addParam(createParam<Davies1900hBlackKnob>(Vec(135, 237), module, StrangeAttractors::ROSSLER_PITCH_PARAM, 0.001, 1.0, RosslerAttractor::DEFAULT_PITCH_VALUE));
 
 	addInput(createInput<PJ301MPort>(Vec(12.5, 110), module, StrangeAttractors::LORENZ_SIGMA_INPUT));
 	addInput(createInput<PJ301MPort>(Vec(55, 110), module, StrangeAttractors::LORENZ_BETA_INPUT));
