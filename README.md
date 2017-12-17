@@ -3,7 +3,7 @@ Nohmad is a collection virtual modules for VCV Rack. Since I'm using these modul
 
 ![Nohmad modules](/res/Modules.png?raw=true "Nohmad modules")
 
-**Strange Attractors:** A split panel oscillator module based on the [Lorenz](http://mathworld.wolfram.com/LorenzAttractor.html) and [Rossler](http://mathworld.wolfram.com/RoesslerAttractor.html) chaotic attractors.
+**Strange Attractors:** A split panel oscillator module implemented using the [Lorenz](http://mathworld.wolfram.com/LorenzAttractor.html) and [Rossler](http://mathworld.wolfram.com/RoesslerAttractor.html) chaotic attractors.
 
 **Noise:** A noise generator based on the [Quantum Rainbow 2](http://www.steadystatefate.com/quantum-rainbow-2) eurorack module by Steady State Fate.
 
