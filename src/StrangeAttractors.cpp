@@ -131,9 +131,12 @@ void StrangeAttractors::step() {
     }
 }
 
-StrangeAttractorsWidget::StrangeAttractorsWidget() {
-	StrangeAttractors *module = new StrangeAttractors();
-	setModule(module);
+
+struct StrangeAttractorsWidget : ModuleWidget {
+	StrangeAttractorsWidget(StrangeAttractors *module);
+};
+
+StrangeAttractorsWidget::StrangeAttractorsWidget(StrangeAttractors *module) : ModuleWidget(module) {
 	box.size = Vec(15 * 12, 380);
 
 	{
@@ -143,26 +146,28 @@ StrangeAttractorsWidget::StrangeAttractorsWidget() {
 		addChild(panel);
 	}
 
-    addParam(createParam<Davies1900hBlackKnob>(Vec(8, 45), module, StrangeAttractors::LORENZ_SIGMA_PARAM, StrangeAttractors::LORENZ_SIGMA_PARAM_MIN, StrangeAttractors::LORENZ_SIGMA_PARAM_MAX, LorenzAttractor::DEFAULT_SIGNMA_VALUE));
-    addParam(createParam<Davies1900hBlackKnob>(Vec(50, 45), module, StrangeAttractors::LORENZ_BETA_PARAM, StrangeAttractors::LORENZ_BETA_PARAM_MIN, StrangeAttractors::LORENZ_BETA_PARAM_MAX, LorenzAttractor::DEFAULT_BETA_VALUE));
-    addParam(createParam<Davies1900hBlackKnob>(Vec(92.5, 45), module, StrangeAttractors::LORENZ_RHO_PARAM, StrangeAttractors::LORENZ_RHO_PARAM_MIN, StrangeAttractors::LORENZ_RHO_PARAM_MAX, LorenzAttractor::DEFAULT_RHO_VALUE));
-	addParam(createParam<Davies1900hBlackKnob>(Vec(135, 45), module, StrangeAttractors::LORENZ_PITCH_PARAM, StrangeAttractors::LORENZ_PITCH_PARAM_MIN, StrangeAttractors::LORENZ_PITCH_PARAM_MAX, LorenzAttractor::DEFAULT_PITCH_VALUE));
-    addParam(createParam<Davies1900hBlackKnob>(Vec(8, 237), module, StrangeAttractors::ROSSLER_A_PARAM, StrangeAttractors::ROSSLER_A_PARAM_MIN, StrangeAttractors::ROSSLER_A_PARAM_MAX, RosslerAttractor::DEFAULT_A_VALUE));
-    addParam(createParam<Davies1900hBlackKnob>(Vec(50, 237), module, StrangeAttractors::ROSSLER_B_PARAM, StrangeAttractors::ROSSLER_B_PARAM_MIN, StrangeAttractors::ROSSLER_B_PARAM_MAX, RosslerAttractor::DEFAULT_B_VALUE));
-    addParam(createParam<Davies1900hBlackKnob>(Vec(92.5, 237), module, StrangeAttractors::ROSSLER_C_PARAM, StrangeAttractors::ROSSLER_C_PARAM_MIN, StrangeAttractors::ROSSLER_C_PARAM_MAX, RosslerAttractor::DEFAULT_C_VALUE));
-	addParam(createParam<Davies1900hBlackKnob>(Vec(135, 237), module, StrangeAttractors::ROSSLER_PITCH_PARAM, StrangeAttractors::ROSSLER_PITCH_PARAM_MIN, StrangeAttractors::ROSSLER_PITCH_PARAM_MAX, RosslerAttractor::DEFAULT_PITCH_VALUE));
+    addParam(ParamWidget::create<Davies1900hBlackKnob>(Vec(8, 45), module, StrangeAttractors::LORENZ_SIGMA_PARAM, StrangeAttractors::LORENZ_SIGMA_PARAM_MIN, StrangeAttractors::LORENZ_SIGMA_PARAM_MAX, LorenzAttractor::DEFAULT_SIGNMA_VALUE));
+    addParam(ParamWidget::create<Davies1900hBlackKnob>(Vec(50, 45), module, StrangeAttractors::LORENZ_BETA_PARAM, StrangeAttractors::LORENZ_BETA_PARAM_MIN, StrangeAttractors::LORENZ_BETA_PARAM_MAX, LorenzAttractor::DEFAULT_BETA_VALUE));
+    addParam(ParamWidget::create<Davies1900hBlackKnob>(Vec(92.5, 45), module, StrangeAttractors::LORENZ_RHO_PARAM, StrangeAttractors::LORENZ_RHO_PARAM_MIN, StrangeAttractors::LORENZ_RHO_PARAM_MAX, LorenzAttractor::DEFAULT_RHO_VALUE));
+	addParam(ParamWidget::create<Davies1900hBlackKnob>(Vec(135, 45), module, StrangeAttractors::LORENZ_PITCH_PARAM, StrangeAttractors::LORENZ_PITCH_PARAM_MIN, StrangeAttractors::LORENZ_PITCH_PARAM_MAX, LorenzAttractor::DEFAULT_PITCH_VALUE));
+    addParam(ParamWidget::create<Davies1900hBlackKnob>(Vec(8, 237), module, StrangeAttractors::ROSSLER_A_PARAM, StrangeAttractors::ROSSLER_A_PARAM_MIN, StrangeAttractors::ROSSLER_A_PARAM_MAX, RosslerAttractor::DEFAULT_A_VALUE));
+    addParam(ParamWidget::create<Davies1900hBlackKnob>(Vec(50, 237), module, StrangeAttractors::ROSSLER_B_PARAM, StrangeAttractors::ROSSLER_B_PARAM_MIN, StrangeAttractors::ROSSLER_B_PARAM_MAX, RosslerAttractor::DEFAULT_B_VALUE));
+    addParam(ParamWidget::create<Davies1900hBlackKnob>(Vec(92.5, 237), module, StrangeAttractors::ROSSLER_C_PARAM, StrangeAttractors::ROSSLER_C_PARAM_MIN, StrangeAttractors::ROSSLER_C_PARAM_MAX, RosslerAttractor::DEFAULT_C_VALUE));
+	addParam(ParamWidget::create<Davies1900hBlackKnob>(Vec(135, 237), module, StrangeAttractors::ROSSLER_PITCH_PARAM, StrangeAttractors::ROSSLER_PITCH_PARAM_MIN, StrangeAttractors::ROSSLER_PITCH_PARAM_MAX, RosslerAttractor::DEFAULT_PITCH_VALUE));
 
-	addInput(createInput<PJ301MPort>(Vec(12.5, 110), module, StrangeAttractors::LORENZ_SIGMA_INPUT));
-	addInput(createInput<PJ301MPort>(Vec(55, 110), module, StrangeAttractors::LORENZ_BETA_INPUT));
-	addInput(createInput<PJ301MPort>(Vec(97.5, 110), module, StrangeAttractors::LORENZ_RHO_INPUT));
-	addInput(createInput<PJ301MPort>(Vec(140, 110), module, StrangeAttractors::LORENZ_PITCH_INPUT));
-	addInput(createInput<PJ301MPort>(Vec(12.5, 300), module, StrangeAttractors::ROSSLER_A_INPUT));
-	addInput(createInput<PJ301MPort>(Vec(55, 300), module, StrangeAttractors::ROSSLER_B_INPUT));
-	addInput(createInput<PJ301MPort>(Vec(97.5, 300), module, StrangeAttractors::ROSSLER_C_INPUT));
-	addInput(createInput<PJ301MPort>(Vec(140, 300), module, StrangeAttractors::ROSSLER_PITCH_INPUT));
+	addInput(Port::create<PJ301MPort>(Vec(12.5, 110), Port::INPUT, module, StrangeAttractors::LORENZ_SIGMA_INPUT));
+	addInput(Port::create<PJ301MPort>(Vec(55, 110), Port::INPUT, module, StrangeAttractors::LORENZ_BETA_INPUT));
+	addInput(Port::create<PJ301MPort>(Vec(97.5, 110), Port::INPUT, module, StrangeAttractors::LORENZ_RHO_INPUT));
+	addInput(Port::create<PJ301MPort>(Vec(140, 110), Port::INPUT, module, StrangeAttractors::LORENZ_PITCH_INPUT));
+	addInput(Port::create<PJ301MPort>(Vec(12.5, 300), Port::INPUT, module, StrangeAttractors::ROSSLER_A_INPUT));
+	addInput(Port::create<PJ301MPort>(Vec(55, 300), Port::INPUT, module, StrangeAttractors::ROSSLER_B_INPUT));
+	addInput(Port::create<PJ301MPort>(Vec(97.5, 300), Port::INPUT, module, StrangeAttractors::ROSSLER_C_INPUT));
+	addInput(Port::create<PJ301MPort>(Vec(140, 300), Port::INPUT, module, StrangeAttractors::ROSSLER_PITCH_INPUT));
 
-	addOutput(createOutput<PJ301MPort>(Vec(12.5, 154), module, StrangeAttractors::LORENZ_X_OUTPUT));
-	addOutput(createOutput<PJ301MPort>(Vec(140, 154), module, StrangeAttractors::LORENZ_Y_OUTPUT));
-	addOutput(createOutput<PJ301MPort>(Vec(12.5, 345), module, StrangeAttractors::ROSSLER_X_OUTPUT));
-	addOutput(createOutput<PJ301MPort>(Vec(140, 345), module, StrangeAttractors::ROSSLER_Y_OUTPUT));
+	addOutput(Port::create<PJ301MPort>(Vec(12.5, 154), Port::OUTPUT, module, StrangeAttractors::LORENZ_X_OUTPUT));
+	addOutput(Port::create<PJ301MPort>(Vec(140, 154), Port::OUTPUT, module, StrangeAttractors::LORENZ_Y_OUTPUT));
+	addOutput(Port::create<PJ301MPort>(Vec(12.5, 345), Port::OUTPUT, module, StrangeAttractors::ROSSLER_X_OUTPUT));
+	addOutput(Port::create<PJ301MPort>(Vec(140, 345), Port::OUTPUT, module, StrangeAttractors::ROSSLER_Y_OUTPUT));
 }
+
+Model *modelStrangeAttractors = Model::create<StrangeAttractors, StrangeAttractorsWidget>("Nohmad", "StrangeAttractors", "Strange Attractors", OSCILLATOR_TAG);

@@ -1,12 +1,9 @@
+SLUG = Nohmad
+VERSION = 0.6.0dev
 
-SOURCES = $(wildcard src/*.cpp)
+SOURCES += $(wildcard src/*.cpp)
 
+DISTRIBUTABLES += $(wildcard LICENSE*) res
 
-include ../../plugin.mk
-
-
-dist: all
-	mkdir -p dist/Nohmad
-	cp LICENSE* dist/Nohmad/
-	cp $(TARGET) dist/Nohmad/
-	cp -R res dist/Nohmad/
+RACK_DIR ?= ../..
+include $(RACK_DIR)/plugin.mk
