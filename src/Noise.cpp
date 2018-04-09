@@ -23,14 +23,14 @@ struct PinkFilter {
 	float y; // Out
 
 	void process(float x) {
-		b0 = 0.99886 * b0 + x * 0.0555179; 
-		b1 = 0.99332 * b1 + x * 0.0750759; 
-		b2 = 0.96900 * b2 + x * 0.1538520; 
-		b3 = 0.86650 * b3 + x * 0.3104856; 
-		b4 = 0.55000 * b4 + x * 0.5329522; 
-		b5 = -0.7616 * b5 - x * 0.0168980; 
+		b0 = 0.99886 * b0 + x * 0.0555179;
+		b1 = 0.99332 * b1 + x * 0.0750759;
+		b2 = 0.96900 * b2 + x * 0.1538520;
+		b3 = 0.86650 * b3 + x * 0.3104856;
+		b4 = 0.55000 * b4 + x * 0.5329522;
+		b5 = -0.7616 * b5 - x * 0.0168980;
 		y = b0 + b1 + b2 + b3 + b4 + b5 + b6 + x * 0.5362;
-		b6 = x * 0.115926; 
+		b6 = x * 0.115926;
 	}
 
 	float pink() {
@@ -166,9 +166,12 @@ struct MiniTrimpot : Trimpot  {
 	}
 };
 
-NoiseWidget::NoiseWidget() {
-	Noise *module = new Noise();
-	setModule(module);
+
+struct NoiseWidget : ModuleWidget {
+	NoiseWidget(Noise *module);
+};
+
+NoiseWidget::NoiseWidget(Noise *module) : ModuleWidget(module) {
 	box.size = Vec(15 * 3, 380);
 
 	{
@@ -178,13 +181,15 @@ NoiseWidget::NoiseWidget() {
 		addChild(panel);
 	}
 
-	addOutput(createOutput<PJ301MPort>(Vec(10.5, 55), module, Noise::WHITE_OUTPUT));
-	addOutput(createOutput<PJ301MPort>(Vec(10.5, 101), module, Noise::PINK_OUTPUT));
-	addOutput(createOutput<PJ301MPort>(Vec(10.5, 150), module, Noise::RED_OUTPUT));
-	addOutput(createOutput<PJ301MPort>(Vec(10.5, 199), module, Noise::GREY_OUTPUT));
-	addOutput(createOutput<PJ301MPort>(Vec(10.5, 247), module, Noise::BLUE_OUTPUT));
-	addOutput(createOutput<PJ301MPort>(Vec(10.5, 295), module, Noise::PURPLE_OUTPUT));
-	addOutput(createOutput<PJ301MPort>(Vec(10.5, 343), module, Noise::QUANTA_OUTPUT));
+	addOutput(Port::create<PJ301MPort>(Vec(10.5, 55), Port::OUTPUT, module, Noise::WHITE_OUTPUT));
+	addOutput(Port::create<PJ301MPort>(Vec(10.5, 101), Port::OUTPUT, module, Noise::PINK_OUTPUT));
+	addOutput(Port::create<PJ301MPort>(Vec(10.5, 150), Port::OUTPUT, module, Noise::RED_OUTPUT));
+	addOutput(Port::create<PJ301MPort>(Vec(10.5, 199), Port::OUTPUT, module, Noise::GREY_OUTPUT));
+	addOutput(Port::create<PJ301MPort>(Vec(10.5, 247), Port::OUTPUT, module, Noise::BLUE_OUTPUT));
+	addOutput(Port::create<PJ301MPort>(Vec(10.5, 295), Port::OUTPUT, module, Noise::PURPLE_OUTPUT));
+	addOutput(Port::create<PJ301MPort>(Vec(10.5, 343), Port::OUTPUT, module, Noise::QUANTA_OUTPUT));
 
-	addParam(createParam<MiniTrimpot>(Vec(30, 365), module, Noise::QUANTA_PARAM, 0.0, 1.0, 0.066));
+	addParam(ParamWidget::create<MiniTrimpot>(Vec(30, 365), module, Noise::QUANTA_PARAM, 0.0, 1.0, 0.066));
 }
+
+Model *modelNoise = Model::create<Noise, NoiseWidget>("Nohmad", "Noise", "Noise", OSCILLATOR_TAG);

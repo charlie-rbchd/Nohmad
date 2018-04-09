@@ -5,14 +5,5 @@ using namespace rack;
 
 extern Plugin *plugin;
 
-////////////////////
-// module widgets
-////////////////////
-
-struct NoiseWidget : ModuleWidget {
-	NoiseWidget();
-};
-
-struct StrangeAttractorsWidget : ModuleWidget {
-	StrangeAttractorsWidget();
-};
+extern Model *modelNoise;
+extern Model *modelStrangeAttractors;
