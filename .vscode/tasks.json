@@ -10,7 +10,33 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "command": "make"
+            "windows": {
+                "command": "C:/msys64/mingw64.exe",
+                "args": [
+                    "make",
+                    "RACK_DIR=/c/Rack-SDK"
+                ]
+            },
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Clean",
+            "type": "shell",
+            "command": "C:/msys64/mingw64.exe",
+            "args": [
+                "make",
+                "RACK_DIR=/c/Rack-SDK",
+                "clean"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "problemMatcher": []
         }
     ]
 }
