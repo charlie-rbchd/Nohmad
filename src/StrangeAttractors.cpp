@@ -4,23 +4,23 @@ struct LorenzAttractor {
     float sigma, beta, rho, pitch; // Params
     float x, y, z; // Out
 
-    static constexpr float DEFAULT_SIGNMA_VALUE = 10.0;
-    static constexpr float DEFAULT_BETA_VALUE = 8.0 / 3.0;
-    static constexpr float DEFAULT_RHO_VALUE = 28.0;
-    static constexpr float DEFAULT_PITCH_VALUE = 0.5;
+    static constexpr float DEFAULT_SIGNMA_VALUE = 10.0f;
+    static constexpr float DEFAULT_BETA_VALUE = 8.0f / 3.0f;
+    static constexpr float DEFAULT_RHO_VALUE = 28.0f;
+    static constexpr float DEFAULT_PITCH_VALUE = 0.5f;
 
     LorenzAttractor() :
         sigma(DEFAULT_SIGNMA_VALUE), beta(DEFAULT_BETA_VALUE), rho(DEFAULT_RHO_VALUE), pitch(DEFAULT_PITCH_VALUE),
-        x(1.0), y(1.0), z(1.0) {}
+        x(1.0f), y(1.0f), z(1.0f) {}
 
     void process(float dt) {
         float dx = sigma * (y - x);
         float dy = x * (rho - z) - y;
         float dz = (x * y) - (beta * z);
 
-        x += dx * dt * pitch * 375.0;
-        y += dy * dt * pitch * 375.0;
-        z += dz * dt * pitch * 375.0;
+        x += dx * dt * pitch * 375.0f;
+        y += dy * dt * pitch * 375.0f;
+        z += dz * dt * pitch * 375.0f;
     }
 };
 
@@ -28,23 +28,23 @@ struct RosslerAttractor {
     float a, b, c, pitch; // Params
     float x, y, z; // Out
 
-    static constexpr float DEFAULT_A_VALUE = 0.2;
-    static constexpr float DEFAULT_B_VALUE = 0.2;
-    static constexpr float DEFAULT_C_VALUE = 5.7;
-    static constexpr float DEFAULT_PITCH_VALUE = 0.5;
+    static constexpr float DEFAULT_A_VALUE = 0.2f;
+    static constexpr float DEFAULT_B_VALUE = 0.2f;
+    static constexpr float DEFAULT_C_VALUE = 5.7f;
+    static constexpr float DEFAULT_PITCH_VALUE = 0.5f;
 
     RosslerAttractor() :
         a(DEFAULT_A_VALUE), b(DEFAULT_B_VALUE), c(DEFAULT_C_VALUE), pitch(DEFAULT_PITCH_VALUE),
-        x(1.0), y(1.0), z(1.0) {}
+        x(1.0f), y(1.0f), z(1.0f) {}
 
     void process(float dt) {
         float dx = -y - z;
         float dy = x + (a * y);
         float dz = b + z * (x - c);
 
-        x += dx * dt * pitch * 2910.0;
-        y += dy * dt * pitch * 2910.0;
-        z += dz * dt * pitch * 2910.0;
+        x += dx * dt * pitch * 2910.0f;
+        y += dy * dt * pitch * 2910.0f;
+        z += dz * dt * pitch * 2910.0f;
     }
 };
 
@@ -84,23 +84,23 @@ struct StrangeAttractors : Module {
     LorenzAttractor lorenz;
     RosslerAttractor rossler;
 
-    static constexpr float LORENZ_SIGMA_PARAM_MIN = 3.0;
-    static constexpr float LORENZ_SIGMA_PARAM_MAX = 30.0;
-    static constexpr float LORENZ_BETA_PARAM_MIN = 0.5;
-    static constexpr float LORENZ_BETA_PARAM_MAX = 3.0;
-    static constexpr float LORENZ_RHO_PARAM_MIN = 13.0;
-    static constexpr float LORENZ_RHO_PARAM_MAX = 80.0;
-    static constexpr float LORENZ_PITCH_PARAM_MIN = 0.001;
-    static constexpr float LORENZ_PITCH_PARAM_MAX = 1.0;
+    static constexpr float LORENZ_SIGMA_PARAM_MIN = 3.0f;
+    static constexpr float LORENZ_SIGMA_PARAM_MAX = 30.0f;
+    static constexpr float LORENZ_BETA_PARAM_MIN = 0.5f;
+    static constexpr float LORENZ_BETA_PARAM_MAX = 3.0f;
+    static constexpr float LORENZ_RHO_PARAM_MIN = 13.0f;
+    static constexpr float LORENZ_RHO_PARAM_MAX = 80.0f;
+    static constexpr float LORENZ_PITCH_PARAM_MIN = 0.001f;
+    static constexpr float LORENZ_PITCH_PARAM_MAX = 1.0f;
 
-    static constexpr float ROSSLER_A_PARAM_MIN = 0.0;
-    static constexpr float ROSSLER_A_PARAM_MAX = 0.2;
-    static constexpr float ROSSLER_B_PARAM_MIN = 0.1;
-    static constexpr float ROSSLER_B_PARAM_MAX = 1.0;
-    static constexpr float ROSSLER_C_PARAM_MIN = 3.0;
-    static constexpr float ROSSLER_C_PARAM_MAX = 12.0;
-    static constexpr float ROSSLER_PITCH_PARAM_MIN = 0.001;
-    static constexpr float ROSSLER_PITCH_PARAM_MAX = 1.0;
+    static constexpr float ROSSLER_A_PARAM_MIN = 0.0f;
+    static constexpr float ROSSLER_A_PARAM_MAX = 0.2f;
+    static constexpr float ROSSLER_B_PARAM_MIN = 0.1f;
+    static constexpr float ROSSLER_B_PARAM_MAX = 1.0f;
+    static constexpr float ROSSLER_C_PARAM_MIN = 3.0f;
+    static constexpr float ROSSLER_C_PARAM_MAX = 12.0f;
+    static constexpr float ROSSLER_PITCH_PARAM_MIN = 0.001f;
+    static constexpr float ROSSLER_PITCH_PARAM_MAX = 1.0f;
 
 	StrangeAttractors() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS) {}
 
@@ -109,25 +109,25 @@ struct StrangeAttractors : Module {
 
 void StrangeAttractors::step() {
     if (outputs[LORENZ_X_OUTPUT].active || outputs[LORENZ_Y_OUTPUT].active) {
-        lorenz.sigma = clampf(params[LORENZ_SIGMA_PARAM].value + inputs[LORENZ_SIGMA_INPUT].value * 0.1, LORENZ_SIGMA_PARAM_MIN, LORENZ_SIGMA_PARAM_MAX);
-        lorenz.beta = clampf(params[LORENZ_BETA_PARAM].value + inputs[LORENZ_BETA_INPUT].value * 0.1, LORENZ_BETA_PARAM_MIN, LORENZ_BETA_PARAM_MAX);
-        lorenz.rho = clampf(params[LORENZ_RHO_PARAM].value + inputs[LORENZ_RHO_INPUT].value * 0.1, LORENZ_RHO_PARAM_MIN, LORENZ_RHO_PARAM_MAX);
-        lorenz.pitch = clampf(params[LORENZ_PITCH_PARAM].value + inputs[LORENZ_PITCH_INPUT].value * 0.1, LORENZ_PITCH_PARAM_MIN, LORENZ_PITCH_PARAM_MAX);
+        lorenz.sigma = clamp(params[LORENZ_SIGMA_PARAM].value + inputs[LORENZ_SIGMA_INPUT].value * 0.1f, LORENZ_SIGMA_PARAM_MIN, LORENZ_SIGMA_PARAM_MAX);
+        lorenz.beta = clamp(params[LORENZ_BETA_PARAM].value + inputs[LORENZ_BETA_INPUT].value * 0.1f, LORENZ_BETA_PARAM_MIN, LORENZ_BETA_PARAM_MAX);
+        lorenz.rho = clamp(params[LORENZ_RHO_PARAM].value + inputs[LORENZ_RHO_INPUT].value * 0.1f, LORENZ_RHO_PARAM_MIN, LORENZ_RHO_PARAM_MAX);
+        lorenz.pitch = clamp(params[LORENZ_PITCH_PARAM].value + inputs[LORENZ_PITCH_INPUT].value * 0.1f, LORENZ_PITCH_PARAM_MIN, LORENZ_PITCH_PARAM_MAX);
 
-        lorenz.process(1.0 / engineGetSampleRate());
-        outputs[LORENZ_X_OUTPUT].value = 5.0 * 0.044 * lorenz.x;
-        outputs[LORENZ_Y_OUTPUT].value = 5.0 * 0.0328 * lorenz.y;
+        lorenz.process(1.0f / engineGetSampleRate());
+        outputs[LORENZ_X_OUTPUT].value = 5.0f * 0.044f * lorenz.x;
+        outputs[LORENZ_Y_OUTPUT].value = 5.0f * 0.0328f * lorenz.y;
     }
 
     if (outputs[ROSSLER_X_OUTPUT].active || outputs[ROSSLER_Y_OUTPUT].active) {
-        rossler.a = clampf(params[ROSSLER_A_PARAM].value + inputs[ROSSLER_A_INPUT].value * 0.1, ROSSLER_A_PARAM_MIN, ROSSLER_A_PARAM_MAX);
-        rossler.b = clampf(params[ROSSLER_B_PARAM].value + inputs[ROSSLER_B_INPUT].value * 0.1, ROSSLER_B_PARAM_MIN, ROSSLER_B_PARAM_MAX);
-        rossler.c = clampf(params[ROSSLER_C_PARAM].value + inputs[ROSSLER_C_INPUT].value * 0.1, ROSSLER_C_PARAM_MIN, ROSSLER_C_PARAM_MAX);
-        rossler.pitch = clampf(params[ROSSLER_PITCH_PARAM].value + inputs[ROSSLER_PITCH_INPUT].value * 0.1, ROSSLER_PITCH_PARAM_MIN, ROSSLER_PITCH_PARAM_MAX);
+        rossler.a = clamp(params[ROSSLER_A_PARAM].value + inputs[ROSSLER_A_INPUT].value * 0.1, ROSSLER_A_PARAM_MIN, ROSSLER_A_PARAM_MAX);
+        rossler.b = clamp(params[ROSSLER_B_PARAM].value + inputs[ROSSLER_B_INPUT].value * 0.1, ROSSLER_B_PARAM_MIN, ROSSLER_B_PARAM_MAX);
+        rossler.c = clamp(params[ROSSLER_C_PARAM].value + inputs[ROSSLER_C_INPUT].value * 0.1, ROSSLER_C_PARAM_MIN, ROSSLER_C_PARAM_MAX);
+        rossler.pitch = clamp(params[ROSSLER_PITCH_PARAM].value + inputs[ROSSLER_PITCH_INPUT].value * 0.1, ROSSLER_PITCH_PARAM_MIN, ROSSLER_PITCH_PARAM_MAX);
 
-        rossler.process(1.0 / engineGetSampleRate());
-        outputs[ROSSLER_X_OUTPUT].value = 5.0 * 0.054 * rossler.x;
-        outputs[ROSSLER_Y_OUTPUT].value = 5.0 * 0.0569 * rossler.y;
+        rossler.process(1.0f / engineGetSampleRate());
+        outputs[ROSSLER_X_OUTPUT].value = 5.0f * 0.054f * rossler.x;
+        outputs[ROSSLER_Y_OUTPUT].value = 5.0f * 0.0569f * rossler.y;
     }
 }
 

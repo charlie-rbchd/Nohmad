@@ -1,6 +1,6 @@
 #include "Nohmad.hpp"
 
-#include "dsp/filter.hpp"
+#include <dsp/filter.hpp>
 
 #include <random>
 #include <cmath>
@@ -9,7 +9,7 @@ struct NoiseGenerator {
 	std::mt19937 rng;
 	std::uniform_real_distribution<float> uniform;
 
-	NoiseGenerator() : uniform(-1.0, 1.0) {
+	NoiseGenerator() : uniform(-1.0f, 1.0f) {
 		rng.seed(std::random_device()());
 	}
 
@@ -23,14 +23,14 @@ struct PinkFilter {
 	float y; // Out
 
 	void process(float x) {
-		b0 = 0.99886 * b0 + x * 0.0555179;
-		b1 = 0.99332 * b1 + x * 0.0750759;
-		b2 = 0.96900 * b2 + x * 0.1538520;
-		b3 = 0.86650 * b3 + x * 0.3104856;
-		b4 = 0.55000 * b4 + x * 0.5329522;
-		b5 = -0.7616 * b5 - x * 0.0168980;
-		y = b0 + b1 + b2 + b3 + b4 + b5 + b6 + x * 0.5362;
-		b6 = x * 0.115926;
+		b0 = 0.99886f * b0 + x * 0.0555179f;
+		b1 = 0.99332f * b1 + x * 0.0750759f;
+		b2 = 0.96900f * b2 + x * 0.1538520f;
+		b3 = 0.86650f * b3 + x * 0.3104856f;
+		b4 = 0.55000f * b4 + x * 0.5329522f;
+		b5 = -0.7616f * b5 - x * 0.0168980f;
+		y = b0 + b1 + b2 + b3 + b4 + b5 + b6 + x * 0.5362f;
+		b6 = x * 0.115926f;
 	}
 
 	float pink() {
@@ -68,15 +68,15 @@ struct NotchFilter {
 	}
 
 	void computeCoefficients() {
-		float c2pf = cos(2.0 * M_PI * freq);
-		float r = 1.0 - 3.0 * bandwidth;
+		float c2pf = cos(2.0f * M_PI * freq);
+		float r = 1.0f - 3.0f * bandwidth;
 		float r2 = r * r;
-		float k = (1.0 - (2.0 * r * c2pf) + r2) / (2.0 - 2.0 * c2pf);
+		float k = (1.0f - (2.0f * r * c2pf) + r2) / (2.0f - 2.0f * c2pf);
 
 		a0 = k;
-		a1 = -2.0 * k * c2pf;
+		a1 = -2.0f * k * c2pf;
 		a2 = k;
-		b1 = 2.0 * r * c2pf;
+		b1 = 2.0f * r * c2pf;
 		b2 = -r2;
 	}
 };
@@ -111,11 +111,11 @@ struct Noise : Module {
 	RCFilter purpleFilter;
 
 	Noise() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS) {
-		redFilter.setCutoff(441.0 / engineGetSampleRate());
-		purpleFilter.setCutoff(44100.0 / engineGetSampleRate());
-		blueFilter.setCutoff(44100.0 / engineGetSampleRate());
-		greyFilter.setFreq(1000.0 / engineGetSampleRate());
-		greyFilter.setBandwidth(0.3);
+		redFilter.setCutoff(441.0f / engineGetSampleRate());
+		purpleFilter.setCutoff(44100.0f / engineGetSampleRate());
+		blueFilter.setCutoff(44100.0f / engineGetSampleRate());
+		greyFilter.setFreq(1000.0f / engineGetSampleRate());
+		greyFilter.setBandwidth(0.3f);
 	}
 
 	void step() override;
@@ -128,35 +128,35 @@ void Noise::step() {
 	}
 
 	if (outputs[WHITE_OUTPUT].active) {
-		outputs[WHITE_OUTPUT].value = 5.0 * white;
+		outputs[WHITE_OUTPUT].value = 5.0f * white;
 	}
 
 	if (outputs[RED_OUTPUT].active) {
 		redFilter.process(white);
-		outputs[RED_OUTPUT].value = 5.0 * clampf(7.8 * redFilter.lowpass(), -1.0, 1.0);
+		outputs[RED_OUTPUT].value = 5.0f * clamp(7.8f * redFilter.lowpass(), -1.0f, 1.0f);
 	}
 
 	if (outputs[PINK_OUTPUT].active) {
-		outputs[PINK_OUTPUT].value = 5.0 * clampf(0.18 * pinkFilter.pink(), -1.0, 1.0);
+		outputs[PINK_OUTPUT].value = 5.0f * clamp(0.18f * pinkFilter.pink(), -1.0f, 1.0f);
 	}
 
 	if (outputs[GREY_OUTPUT].active) {
 		greyFilter.process(pinkFilter.pink() * 0.034);
-		outputs[GREY_OUTPUT].value = 5.0 * clampf(0.23 * (pinkFilter.pink() * 0.5 + greyFilter.notch() * 0.5), -1.0, 1.0);
+		outputs[GREY_OUTPUT].value = 5.0f * clamp(0.23f * (pinkFilter.pink() * 0.5f + greyFilter.notch() * 0.5f), -1.0f, 1.0f);
 	}
 
 	if (outputs[BLUE_OUTPUT].active) {
 		blueFilter.process(pinkFilter.pink());
-		outputs[BLUE_OUTPUT].value = 5.0 * clampf(0.64 * blueFilter.highpass(), -1.0, 1.0);
+		outputs[BLUE_OUTPUT].value = 5.0f * clamp(0.64f * blueFilter.highpass(), -1.0f, 1.0f);
 	}
 
 	if (outputs[PURPLE_OUTPUT].active) {
 		purpleFilter.process(white);
-		outputs[PURPLE_OUTPUT].value = 5.0 * clampf(0.82 * purpleFilter.highpass(), -1.0, 1.0);
+		outputs[PURPLE_OUTPUT].value = 5.0f * clamp(0.82f * purpleFilter.highpass(), -1.0f, 1.0f);
 	}
 
 	if (outputs[QUANTA_OUTPUT].active) {
-		outputs[QUANTA_OUTPUT].value = abs(white) <= params[QUANTA_PARAM].value ? 5.0 * sgnf(white) : 0.0;
+		outputs[QUANTA_OUTPUT].value = abs(white) <= params[QUANTA_PARAM].value ? 5.0f * sgn(white) : 0.0f;
 	}
 }
 
@@ -189,7 +189,7 @@ NoiseWidget::NoiseWidget(Noise *module) : ModuleWidget(module) {
 	addOutput(Port::create<PJ301MPort>(Vec(10.5, 295), Port::OUTPUT, module, Noise::PURPLE_OUTPUT));
 	addOutput(Port::create<PJ301MPort>(Vec(10.5, 343), Port::OUTPUT, module, Noise::QUANTA_OUTPUT));
 
-	addParam(ParamWidget::create<MiniTrimpot>(Vec(30, 365), module, Noise::QUANTA_PARAM, 0.0, 1.0, 0.066));
+	addParam(ParamWidget::create<MiniTrimpot>(Vec(30, 365), module, Noise::QUANTA_PARAM, 0.0f, 1.0f, 0.066f));
 }
 
 Model *modelNoise = Model::create<Noise, NoiseWidget>("Nohmad", "Noise", "Noise", OSCILLATOR_TAG);
