@@ -1,6 +1,7 @@
-build/
-dist/
-res/*.ai
-*.dll
-*.dylib
-*.so
+/build
+/dist
+/plugin.dylib
+/plugin.dll
+/plugin.so
+.DS_Store
+*.ai
