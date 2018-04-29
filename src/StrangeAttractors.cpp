@@ -170,4 +170,4 @@ StrangeAttractorsWidget::StrangeAttractorsWidget(StrangeAttractors *module) : Mo
 	addOutput(Port::create<PJ301MPort>(Vec(140, 345), Port::OUTPUT, module, StrangeAttractors::ROSSLER_Y_OUTPUT));
 }
 
-Model *modelStrangeAttractors = Model::create<StrangeAttractors, StrangeAttractorsWidget>("Nohmad", "StrangeAttractors", "Strange Attractors", OSCILLATOR_TAG);
+Model *modelStrangeAttractors = Model::create<StrangeAttractors, StrangeAttractorsWidget>("Nohmad", "StrangeAttractors", "Strange Attractors", OSCILLATOR_TAG, LFO_TAG);

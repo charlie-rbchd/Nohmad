@@ -192,4 +192,4 @@ NoiseWidget::NoiseWidget(Noise *module) : ModuleWidget(module) {
 	addParam(ParamWidget::create<MiniTrimpot>(Vec(30, 365), module, Noise::QUANTA_PARAM, 0.0f, 1.0f, 0.066f));
 }
 
-Model *modelNoise = Model::create<Noise, NoiseWidget>("Nohmad", "Noise", "Noise", OSCILLATOR_TAG);
+Model *modelNoise = Model::create<Noise, NoiseWidget>("Nohmad", "Noise", "Noise", NOISE_TAG);
