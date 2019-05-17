@@ -103,58 +103,60 @@ struct Noise : Module {
 	NoiseGenerator noise;
 
 	PinkFilter pinkFilter;
-	RCFilter redFilter;
+	dsp::RCFilter redFilter;
 	NotchFilter greyFilter;
-	RCFilter blueFilter;
-	RCFilter purpleFilter;
+	dsp::RCFilter blueFilter;
+	dsp::RCFilter purpleFilter;
 
-	Noise() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS) {
-		redFilter.setCutoff(441.0f / engineGetSampleRate());
-		purpleFilter.setCutoff(44100.0f / engineGetSampleRate());
-		blueFilter.setCutoff(44100.0f / engineGetSampleRate());
-		greyFilter.setFreq(1000.0f / engineGetSampleRate());
+	Noise() {
+    config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS);
+    configParam(QUANTA_PARAM, 0.0f, 1.0f, 0.066f);
+		redFilter.setCutoff(441.0f / APP->engine->getSampleRate());
+		purpleFilter.setCutoff(44100.0f / APP->engine->getSampleRate());
+		blueFilter.setCutoff(44100.0f / APP->engine->getSampleRate());
+		greyFilter.setFreq(1000.0f / APP->engine->getSampleRate());
 		greyFilter.setBandwidth(0.3f);
 	}
 
-	void step() override;
+	void process(const ProcessArgs &args) override;
 };
 
-void Noise::step() {
+void Noise::process(const ProcessArgs &args) {
 	float white = noise.white();
-	if (outputs[PINK_OUTPUT].active || outputs[BLUE_OUTPUT].active || outputs[GREY_OUTPUT].active) {
+	if (outputs[PINK_OUTPUT].isConnected() || outputs[BLUE_OUTPUT].isConnected() || outputs[GREY_OUTPUT].isConnected()) {
 		pinkFilter.process(white);
 	}
 
-	if (outputs[WHITE_OUTPUT].active) {
-		outputs[WHITE_OUTPUT].value = 5.0f * white;
+	if (outputs[WHITE_OUTPUT].isConnected()) {
+		outputs[WHITE_OUTPUT].setVoltage(5.0f * white);
 	}
 
-	if (outputs[RED_OUTPUT].active) {
+	if (outputs[RED_OUTPUT].isConnected()) {
 		redFilter.process(white);
-		outputs[RED_OUTPUT].value = 5.0f * clamp(7.8f * redFilter.lowpass(), -1.0f, 1.0f);
+		outputs[RED_OUTPUT].setVoltage(5.0f * clamp(7.8f * redFilter.lowpass(), -1.0f, 1.0f));
 	}
 
-	if (outputs[PINK_OUTPUT].active) {
-		outputs[PINK_OUTPUT].value = 5.0f * clamp(0.18f * pinkFilter.pink(), -1.0f, 1.0f);
+	if (outputs[PINK_OUTPUT].isConnected()) {
+		outputs[PINK_OUTPUT].setVoltage(5.0f * clamp(0.18f * pinkFilter.pink(), -1.0f, 1.0f));
 	}
 
-	if (outputs[GREY_OUTPUT].active) {
+	if (outputs[GREY_OUTPUT].isConnected()) {
 		greyFilter.process(pinkFilter.pink() * 0.034);
-		outputs[GREY_OUTPUT].value = 5.0f * clamp(0.23f * (pinkFilter.pink() * 0.5f + greyFilter.notch() * 0.5f), -1.0f, 1.0f);
+		outputs[GREY_OUTPUT].setVoltage(5.0f * clamp(0.23f * (pinkFilter.pink() * 0.5f + greyFilter.notch() * 0.5f), -1.0f, 1.0f));
 	}
 
-	if (outputs[BLUE_OUTPUT].active) {
+	if (outputs[BLUE_OUTPUT].isConnected()) {
 		blueFilter.process(pinkFilter.pink());
-		outputs[BLUE_OUTPUT].value = 5.0f * clamp(0.64f * blueFilter.highpass(), -1.0f, 1.0f);
+		outputs[BLUE_OUTPUT].setVoltage(5.0f * clamp(0.64f * blueFilter.highpass(), -1.0f, 1.0f));
 	}
 
-	if (outputs[PURPLE_OUTPUT].active) {
+	if (outputs[PURPLE_OUTPUT].isConnected()) {
 		purpleFilter.process(white);
-		outputs[PURPLE_OUTPUT].value = 5.0f * clamp(0.82f * purpleFilter.highpass(), -1.0f, 1.0f);
+		outputs[PURPLE_OUTPUT].setVoltage(5.0f * clamp(0.82f * purpleFilter.highpass(), -1.0f, 1.0f));
 	}
 
-	if (outputs[QUANTA_OUTPUT].active) {
-		outputs[QUANTA_OUTPUT].value = abs(white) <= params[QUANTA_PARAM].value ? 5.0f * sgn(white) : 0.0f;
+	if (outputs[QUANTA_OUTPUT].isConnected()) {
+		outputs[QUANTA_OUTPUT].setVoltage(abs(white) <= params[QUANTA_PARAM].getValue() ? 5.0f * sgn(white) : 0.0f);
 	}
 }
 
@@ -169,25 +171,21 @@ struct NoiseWidget : ModuleWidget {
 	NoiseWidget(Noise *module);
 };
 
-NoiseWidget::NoiseWidget(Noise *module) : ModuleWidget(module) {
+NoiseWidget::NoiseWidget(Noise *module) {
+		setModule(module);
 	box.size = Vec(15 * 3, 380);
 
-	{
-		SVGPanel *panel = new SVGPanel();
-		panel->box.size = box.size;
-		panel->setBackground(SVG::load(assetPlugin(pluginInstance, "res/Noise.svg")));
-		addChild(panel);
-	}
+	setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Noise.svg")));
 
-	addOutput(createPort<PJ301MPort>(Vec(10.5, 55), PortWidget::OUTPUT, module, Noise::WHITE_OUTPUT));
-	addOutput(createPort<PJ301MPort>(Vec(10.5, 101), PortWidget::OUTPUT, module, Noise::PINK_OUTPUT));
-	addOutput(createPort<PJ301MPort>(Vec(10.5, 150), PortWidget::OUTPUT, module, Noise::RED_OUTPUT));
-	addOutput(createPort<PJ301MPort>(Vec(10.5, 199), PortWidget::OUTPUT, module, Noise::GREY_OUTPUT));
-	addOutput(createPort<PJ301MPort>(Vec(10.5, 247), PortWidget::OUTPUT, module, Noise::BLUE_OUTPUT));
-	addOutput(createPort<PJ301MPort>(Vec(10.5, 295), PortWidget::OUTPUT, module, Noise::PURPLE_OUTPUT));
-	addOutput(createPort<PJ301MPort>(Vec(10.5, 343), PortWidget::OUTPUT, module, Noise::QUANTA_OUTPUT));
+	addOutput(createOutput<PJ301MPort>(Vec(10.5, 55), module, Noise::WHITE_OUTPUT));
+	addOutput(createOutput<PJ301MPort>(Vec(10.5, 101), module, Noise::PINK_OUTPUT));
+	addOutput(createOutput<PJ301MPort>(Vec(10.5, 150), module, Noise::RED_OUTPUT));
+	addOutput(createOutput<PJ301MPort>(Vec(10.5, 199), module, Noise::GREY_OUTPUT));
+	addOutput(createOutput<PJ301MPort>(Vec(10.5, 247), module, Noise::BLUE_OUTPUT));
+	addOutput(createOutput<PJ301MPort>(Vec(10.5, 295), module, Noise::PURPLE_OUTPUT));
+	addOutput(createOutput<PJ301MPort>(Vec(10.5, 343), module, Noise::QUANTA_OUTPUT));
 
-	addParam(createParam<MiniTrimpot>(Vec(30, 365), module, Noise::QUANTA_PARAM, 0.0f, 1.0f, 0.066f));
+	addParam(createParam<MiniTrimpot>(Vec(30, 365), module, Noise::QUANTA_PARAM));
 }
 
 Model *modelNoise = createModel<Noise, NoiseWidget>("Noise");
