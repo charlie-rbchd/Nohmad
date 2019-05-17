@@ -3,7 +3,7 @@
 #include <rack.hpp>
 using namespace rack;
 
-extern Plugin *plugin;
+extern Plugin *pluginInstance;
 
 extern Model *modelNoise;
 extern Model *modelStrangeAttractors;

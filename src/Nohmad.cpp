@@ -1,13 +1,9 @@
 #include "Nohmad.hpp"
 
-Plugin *plugin;
+Plugin *pluginInstance;
 
 void init(rack::Plugin *p) {
-	plugin = p;
-	p->slug = TOSTRING(SLUG);
-	p->version = TOSTRING(VERSION);
-
-	p->website = "https://github.com/joelrobichaud/Nohmad";
+	pluginInstance = p;
 
 	p->addModel(modelNoise);
 	p->addModel(modelStrangeAttractors);
