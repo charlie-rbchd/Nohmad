@@ -111,6 +111,10 @@ struct Noise : Module {
 	Noise() {
     config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS);
     configParam(QUANTA_PARAM, 0.0f, 1.0f, 0.066f);
+    onSampleRateChange();
+	}
+
+	void onSampleRateChange() override {
 		redFilter.setCutoff(441.0f / APP->engine->getSampleRate());
 		purpleFilter.setCutoff(44100.0f / APP->engine->getSampleRate());
 		blueFilter.setCutoff(44100.0f / APP->engine->getSampleRate());
