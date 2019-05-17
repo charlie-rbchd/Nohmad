@@ -1,7 +1,5 @@
 #include "Nohmad.hpp"
 
-#include <dsp/filter.hpp>
-
 #include <random>
 #include <cmath>
 
@@ -177,19 +175,19 @@ NoiseWidget::NoiseWidget(Noise *module) : ModuleWidget(module) {
 	{
 		SVGPanel *panel = new SVGPanel();
 		panel->box.size = box.size;
-		panel->setBackground(SVG::load(assetPlugin(plugin, "res/Noise.svg")));
+		panel->setBackground(SVG::load(assetPlugin(pluginInstance, "res/Noise.svg")));
 		addChild(panel);
 	}
 
-	addOutput(Port::create<PJ301MPort>(Vec(10.5, 55), Port::OUTPUT, module, Noise::WHITE_OUTPUT));
-	addOutput(Port::create<PJ301MPort>(Vec(10.5, 101), Port::OUTPUT, module, Noise::PINK_OUTPUT));
-	addOutput(Port::create<PJ301MPort>(Vec(10.5, 150), Port::OUTPUT, module, Noise::RED_OUTPUT));
-	addOutput(Port::create<PJ301MPort>(Vec(10.5, 199), Port::OUTPUT, module, Noise::GREY_OUTPUT));
-	addOutput(Port::create<PJ301MPort>(Vec(10.5, 247), Port::OUTPUT, module, Noise::BLUE_OUTPUT));
-	addOutput(Port::create<PJ301MPort>(Vec(10.5, 295), Port::OUTPUT, module, Noise::PURPLE_OUTPUT));
-	addOutput(Port::create<PJ301MPort>(Vec(10.5, 343), Port::OUTPUT, module, Noise::QUANTA_OUTPUT));
+	addOutput(createPort<PJ301MPort>(Vec(10.5, 55), PortWidget::OUTPUT, module, Noise::WHITE_OUTPUT));
+	addOutput(createPort<PJ301MPort>(Vec(10.5, 101), PortWidget::OUTPUT, module, Noise::PINK_OUTPUT));
+	addOutput(createPort<PJ301MPort>(Vec(10.5, 150), PortWidget::OUTPUT, module, Noise::RED_OUTPUT));
+	addOutput(createPort<PJ301MPort>(Vec(10.5, 199), PortWidget::OUTPUT, module, Noise::GREY_OUTPUT));
+	addOutput(createPort<PJ301MPort>(Vec(10.5, 247), PortWidget::OUTPUT, module, Noise::BLUE_OUTPUT));
+	addOutput(createPort<PJ301MPort>(Vec(10.5, 295), PortWidget::OUTPUT, module, Noise::PURPLE_OUTPUT));
+	addOutput(createPort<PJ301MPort>(Vec(10.5, 343), PortWidget::OUTPUT, module, Noise::QUANTA_OUTPUT));
 
-	addParam(ParamWidget::create<MiniTrimpot>(Vec(30, 365), module, Noise::QUANTA_PARAM, 0.0f, 1.0f, 0.066f));
+	addParam(createParam<MiniTrimpot>(Vec(30, 365), module, Noise::QUANTA_PARAM, 0.0f, 1.0f, 0.066f));
 }
 
-Model *modelNoise = Model::create<Noise, NoiseWidget>("Nohmad", "Noise", "Noise", NOISE_TAG);
+Model *modelNoise = createModel<Noise, NoiseWidget>("Noise");
